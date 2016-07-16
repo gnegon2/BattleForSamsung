@@ -1,0 +1,24 @@
+Init log.
+LoadMap.
+InitLocalMaps.
+InitForbiddenPlaces.
+Starting up server.
+Waiting for a connection...
+Waiting for a connection...
+New player connected!
+New player enter main menu!
+Player reply is: R
+Player reply is: Register
+Checking username: mateuszCreating account for username: mateuszNew account created: mateusz
+mateusz construct new fortress on 1 1!
+mateusz construct new fortress on 0 1!
+mateusz construct new fortress on 2 1!
+mateusz construct new fortress on 1 0!
+mateusz construct new fortress on 1 2!
+mateusz enters World Map
+mateusz attack fortress on field: 1 1
+Army near fortress!
+Init battle on field: 1 1!
+Start battle on field: 1 1!
+Init BattleMap!
+Error. Stopping Server.

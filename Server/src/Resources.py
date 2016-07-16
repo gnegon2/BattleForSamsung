@@ -1,22 +1,28 @@
-
-class Resources():
-    GOLD = "GOLD"
-    WOOD = "WOOD"
-    STONE = "STONE"
-    CRYSTALS = "CRYSTALS"
+from collections import OrderedDict
+import Control
     
-    def __init__(self):
-        self.gold = 0
-        self.wood = 0
-        self.stone = 0
-        self.crystals = 0
+class Resources(OrderedDict):  
+    def __init__(self, *arg, **kw):
+        super(Resources, self).__init__(*arg, **kw)
         
-    def Add(self, resourceType, resourceAmount):
-        if resourceType == Resources.GOLD:
-            self.gold += resourceAmount
-        elif resourceType == Resources.WOOD:
-            self.wood += resourceAmount
-        elif resourceType == Resources.STONE:
-            self.stone += resourceAmount
-        elif resourceType == Resources.CRYSTALS:
-            self.crystals += resourceAmount
+    def Init(self, gold=0, wood=0, stone=0, crystals=0):
+        self[Gold] = gold
+        self[Wood] = wood
+        self[Stone] = stone
+        self[Crystals] = crystals
+    
+class Gold():
+    name = "gold"
+    color = Control.CTRL_COLOR_GOLD
+    
+class Wood():
+    name = "wood"
+    color = Control.CTRL_COLOR_BROWN
+    
+class Stone():
+    name = "stone"
+    color = Control.CTRL_COLOR_STEEL
+    
+class Crystals():
+    name = "crystals"
+    color = Control.CTRL_COLOR_VIOLET

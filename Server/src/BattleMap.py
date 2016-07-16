@@ -1,7 +1,7 @@
-from Control import Control
-from Utility import Utility
 from LocalMapStruct import localMaps
-from Log import Log
+import Control
+import Utility
+import Log
 import Config
 
 class BattleMap():

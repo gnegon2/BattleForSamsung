@@ -1,269 +1,186 @@
 from Commands import UnitsCommands
-from Control import Control
-from Control import Type
-from Utility import Utility
-from Buildings import Buildings
+import Control
+import Utility
+from Resources import Resources
+from Statistics import Statistics
 
-class Units():    
+def CommandToUnit(player, command):
+    if command == UnitsCommands.PEASANT:
+        return Peasant
+    elif command == UnitsCommands.ARCHER:
+        return Archer
+    elif command == UnitsCommands.SWORDMAN:
+        return Swordman
+    elif command == UnitsCommands.PIKEMAN:
+        return Pikeman
+    elif command == UnitsCommands.CROSSBOWMAN:
+        return Crossbowman
+    elif command == UnitsCommands.HORSEMAN:
+        return Horseman
+    elif command == UnitsCommands.CATAPULT:
+        return Catapult
+    elif command == UnitsCommands.CANNON:
+        return Cannon
+    else:
+        return Empty
 
+def Buy(player, unit):
+    for resType, resAmount in unit.cost.iteritems():
+        resDiff = resAmount - player.resources[resType]
+        if resDiff > 0:
+            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n" )
+            return False
+    for resType, resAmount in unit.cost.iteritems():
+        player.resources[resType] -= resAmount
+    return True
+    
+def ShowInfo(player, unit):
+    Utility.SendMsg(player, Control.CTRL_COLOR_AZURE + unit.__class__.__name__ + ": \n")
+    Utility.SendMsg(player, unit.ExtraInfo())
+    Utility.SendMsg(player, Control.CTRL_COLOR_ORANGE + "Cost: \n")
+    for iType, iAmount in unit.cost.iteritems():
+        if iAmount > 0:
+            Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")
+        
+    Utility.SendMsg(player, Control.CTRL_COLOR_ORANGE + "Statistics: \n")
+    for iType, iAmount in unit.statistics.iteritems():
+        if iAmount > 0:
+            Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n") 
+
+class Empty():
+    'Empty Unit'
+
+class Unit(object): 
+    
+    def __new__(typ, *args, **kwargs):
+        obj = object.__new__(typ, *args, **kwargs)
+        obj.owner = args[0]
+        obj.movedInTurn = False
+        obj.attackedInTurn = False
+        obj.owner.info.numberOfUnits += 1
+        print "obj.owner.info.numberOfUnits=" + str(obj.owner.info.numberOfUnits)
+        return obj
+    
+    def __del__(self):
+        self.owner.info.numberOfUnits -= 1
+        print "del obj.owner.info.numberOfUnits=" + str(self.owner.info.numberOfUnits)
+        
+class Peasant(Unit):
+    cost = Resources()
+    cost.Init(5)
+    statistics = Statistics()
+    statistics.Init(10, 2, 1, 1, 2, 1, 1)
+    
+    def __init__(self, player):
+        self.field = "1"
+        self.color = Control.CTRL_COLOR_GREEN
+        self.statistics = self.__class__.statistics
+        
     @staticmethod
-    def CommandToUnit(command):
-        if command == UnitsCommands.PEASANT:
-            return Units.Peasant()
-        elif command == UnitsCommands.ARCHER:
-            return Units.Archer()
-        elif command == UnitsCommands.SWORDMAN:
-            return Units.Swordman()
-        elif command == UnitsCommands.PIKEMAN:
-            return Units.Pikeman()
-        elif command == UnitsCommands.CROSSBOWMAN:
-            return Units.Crossbowman()
-        elif command == UnitsCommands.HORSEMAN:
-            return Units.Horseman()
-        elif command == UnitsCommands.CATAPULT:
-            return Units.Catapult()
-        elif command == UnitsCommands.CANNON:
-            return Units.Cannon()
-        else:
-            return Buildings.Empty()
+    def ExtraInfo():
+        return "Peasant is the stupid man with fork.\n"
+
+class Archer(Unit):
+    cost = Resources()
+    cost.Init(20)
+    statistics = Statistics()
+    statistics.Init(20, 3, 2, 2, 4, 3, 1)
+        
+    def __init__(self, player):
+        self.field = "2"
+        self.color = Control.CTRL_COLOR_GOLD
+        self.statistics = self.__class__.statistics
     
     @staticmethod
-    def Buy(player, unit):
-        if player.resources.gold >= unit.gold:
-            if player.resources.wood >= unit.wood:
-                if player.resources.stone >= unit.stone:
-                    if player.resources.crystals >= unit.crystals:
-                        player.resources.gold  -= unit.gold
-                        player.resources.wood  -= unit.wood
-                        player.resources.stone -= unit.stone
-                        player.resources.crystals -= unit.crystals
-                        return True
-                    Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You need " + str(unit.crystals - player.resources.crystals) + " more crystals!\n" )
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You need " + str(unit.stone - player.resources.stone) + " more stone!\n" )
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You need " + str(unit.wood - player.resources.wood) + " more wood!\n" )
-        Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You need " + str(unit.gold - player.resources.gold) + " more gold!\n" )
-        return False
+    def ExtraInfo():
+        return "Archer can attack on distance.\n"
+    
+class Swordman(Unit):
+    cost = Resources()
+    cost.Init(50, 0, 1)
+    statistics = Statistics()
+    statistics.Init(50, 8, 6, 5, 8, 1, 1)
+    
+    def __init__(self, player):
+        self.field = "3"
+        self.color = Control.CTRL_COLOR_STEEL
+        self.statistics = self.__class__.statistics
+    
+    @staticmethod
+    def ExtraInfo():
+        return "Swordman is a strong unit in armor.\n"
+    
+class Pikeman(Unit):
+    cost = Resources()
+    cost.Init(70, 1)
+    statistics = Statistics()
+    statistics.Init(70, 10, 7, 6, 12, 2, 2)
+    
+    def __init__(self, player):
+        self.field = "4" 
+        self.color = Control.CTRL_COLOR_GRANAT
+        self.statistics = self.__class__.statistics     
+    
+    @staticmethod
+    def ExtraInfo():
+        return "Pikeman is best against horseman.\n"
+     
+class Crossbowman(Unit):
+    cost = Resources()
+    cost.Init(80, 1, 1)
+    statistics = Statistics()
+    statistics.Init(70, 8, 8, 10, 12, 4, 2)
+                    
+    def __init__(self, player):
+        self.field = "5" 
+        self.color = Control.CTRL_COLOR_ORANGE
+        self.statistics = self.__class__.statistics
         
     @staticmethod
-    def ShowInfo(player, unit):
-        Utility.SendMsg(player, Control.CTRL_COLOR_AZURE + unit.__class__.__name__ + ": \n")
-        Utility.SendMsg(player, unit.ExtraInfo())
-        Utility.SendMsg(player, Control.CTRL_COLOR_ORANGE + "Cost: \n")
-        if hasattr(unit, 'gold'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_GOLD + "Gold: " + str(unit.gold) + "\n")
-        if hasattr(unit, 'wood'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_BROWN + "Wood: " + str(unit.wood) + "\n")
-        if hasattr(unit, 'stone'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_STEEL + "Stone: " + str(unit.stone) + "\n")
-        if hasattr(unit, 'crystals'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_VIOLET + "Crystals: " + str(unit.crystals) + "\n")
-            
-        Utility.SendMsg(player, Control.CTRL_COLOR_ORANGE + "Statistics: \n")
-        if hasattr(unit, 'hit_points'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Hit points: " + str(unit.hit_points) + "\n")
-        if hasattr(unit, 'defence'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_STEEL + "Defence: " + str(unit.defence) + "\n")
-        if hasattr(unit, 'attack'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Attack: " + str(unit.attack) + "\n")
-        if hasattr(unit, 'min_damage'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_BROWN + "Min. damage: " + str(unit.min_damage) + "\n")
-        if hasattr(unit, 'max_damage'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_VIOLET + "Max. damage: " + str(unit.max_damage) + "\n")
-        if hasattr(unit, 'range'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_GOLD + "Range: " + str(unit.range) + "\n")    
-        if hasattr(unit, 'speed'):
-            Utility.SendMsg(player, Control.CTRL_COLOR_GOLD + "Speed: " + str(unit.speed) + "\n") 
-
-    class Peasant():
-        def __init__(self, player):
-            self.field = "1"
-            self.color = Control.CTRL_COLOR_GREEN
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 5
-            
-            self.hit_points = 10
-            self.defence = 2
-            self.attack = 1
-            self.min_damage = 1
-            self.max_damage = 2
-            self.range = 1
-            self.speed = 1
-            
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Peasant is the stupid man with fork.\n"
-            return extraInfoMsg
-        
-    class Archer():
-        def __init__(self, player):
-            self.field = "2"
-            self.color = Control.CTRL_COLOR_GOLD
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 20
-            
-            self.hit_points = 20
-            self.defence = 3
-            self.attack = 2
-            self.min_damage = 2
-            self.max_damage = 4
-            self.range = 3
-            self.speed = 1
-        
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Archer can attack on distance.\n"
-            return extraInfoMsg
-        
-    class Swordman():
-        def __init__(self, player):
-            self.field = "3"
-            self.color = Control.CTRL_COLOR_STEEL
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 50
-            self.stone = 1
+    def ExtraInfo():
+        return "Crossbowman is a very strong range unit.\n"
+    
+class Horseman(Unit):
+    cost = Resources()
+    cost.Init(100, 2)
+    statistics = Statistics()
+    statistics.Init(100, 15, 10, 12, 15, 1, 4)
                     
-            self.hit_points = 50
-            self.defence = 8
-            self.attack = 6
-            self.min_damage = 5
-            self.max_damage = 8
-            self.range = 1
-            self.speed = 1
+    def __init__(self, player):
+        self.field = "6" 
+        self.color = Control.CTRL_COLOR_WOOD
+        self.statistics = self.__class__.statistics
+    
+    @staticmethod
+    def ExtraInfo():
+        return "Horseman is a very fast unit.\n"
+    
+class Catapult(Unit):
+    cost = Resources()
+    cost.Init(150, 2, 2)
+    statistics = Statistics()
+    statistics.Init(150, 12, 15, 15, 20, 6, 1)
+    
+    def __init__(self, player):
+        self.field = "7" 
+        self.color = Control.CTRL_COLOR_BLOOD
+        self.statistics = self.__class__.statistics
         
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Swordman is a strong unit in armor.\n"
-            return extraInfoMsg
+    @staticmethod
+    def ExtraInfo():
+        return "Catapult can attack at very high distance.\n"
+    
+class Cannon(Unit):
+    cost = Resources()
+    cost.Init(200, 2, 2, 1)
+    statistics = Statistics()
+    statistics.Init(200, 20, 20, 20, 20, 4, 2)
+                    
+    def __init__(self, player):
+        self.field = "8" 
+        self.color = Control.CTRL_COLOR_AZURE
+        self.statistics = self.__class__.statistics
         
-    class Pikeman():
-        def __init__(self, player):
-            self.field = "4" 
-            self.color = Control.CTRL_COLOR_GRANAT
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 70
-            self.wood = 1
-            
-            self.hit_points = 70
-            self.defence = 10
-            self.attack = 7
-            self.min_damage = 6
-            self.max_damage = 12
-            self.range = 2
-            self.speed = 2
-        
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Pikeman is best against horseman.\n"
-            return extraInfoMsg
-         
-    class Crossbowman():
-        def __init__(self, player):
-            self.field = "5" 
-            self.color = Control.CTRL_COLOR_ORANGE
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 80
-            self.wood = 1
-            self.stone = 1
-            
-            self.hit_points = 70
-            self.defence = 8
-            self.attack = 8
-            self.min_damage = 10
-            self.max_damage = 12
-            self.range = 4
-            self.speed = 2
-            
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Crossbowman is a very strong range unit.\n"
-            return extraInfoMsg
-        
-    class Horseman():
-        def __init__(self, player):
-            self.field = "6" 
-            self.color = Control.CTRL_COLOR_BROWN
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 100
-            self.wood = 2
-            
-            self.hit_points = 100
-            self.defence = 15
-            self.attack = 10
-            self.min_damage = 12
-            self.max_damage = 15
-            self.range = 1
-            self.speed = 4 
-        
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Horseman is a very fast unit.\n"
-            return extraInfoMsg
-        
-    class Catapult():
-        def __init__(self, player):
-            self.field = "7" 
-            self.color = Control.CTRL_COLOR_BLOOD
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 150
-            self.wood = 2
-            self.stone = 2
-            
-            self.hit_points = 150
-            self.defence = 12
-            self.attack = 15
-            self.min_damage = 15
-            self.max_damage = 20
-            self.range = 6 
-            self.speed = 1
-            
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Catapult can attack at very high distance.\n"
-            return extraInfoMsg
-        
-    class Cannon():
-        def __init__(self, player):
-            self.field = "8" 
-            self.color = Control.CTRL_COLOR_AZURE
-            self.type = Type.UNIT
-            self.owner = player
-            
-            self.gold = 200
-            self.wood = 2
-            self.stone = 2
-            self.crystals = 1
-            
-            self.hit_points = 200
-            self.defence = 20
-            self.attack = 20
-            self.min_damage = 20
-            self.max_damage = 20
-            self.range = 4
-            self.speed = 2
-            
-        @staticmethod
-        def ExtraInfo():
-            extraInfoMsg = Control.CTRL_COLOR_GREEN
-            extraInfoMsg += "Cannon is the most powerfull unit.\n"
-            return extraInfoMsg
+    @staticmethod
+    def ExtraInfo():
+        return "Cannon is the most powerfull unit.\n"

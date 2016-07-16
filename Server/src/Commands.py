@@ -1,4 +1,4 @@
-from Control import Control
+import Control
 
 class MenuCommands():
     REGISTER = "Register"

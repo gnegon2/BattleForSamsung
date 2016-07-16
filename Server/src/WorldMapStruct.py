@@ -1,5 +1,3 @@
-
-class WorldMapStruct:
-    sizeX = 0
-    sizeY = 0
-    fields = []
+sizeX = 0
+sizeY = 0
+fields = []

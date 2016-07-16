@@ -1,17 +1,10 @@
 from __future__ import unicode_literals
-import socket
-import thread
-import sys
-import getpass
-
 from prompt_toolkit import prompt
 from prompt_toolkit.contrib.completers import WordCompleter
 from prompt_toolkit.shortcuts import print_tokens
 from prompt_toolkit.styles import style_from_dict
 from prompt_toolkit.token import Token
-
-import Config
-from Control import Control
+from prompt_toolkit.history import InMemoryHistory
 from Commands import MenuCommands
 from Commands import MainCommands
 from Commands import WorldMapCommands
@@ -20,9 +13,16 @@ from Commands import BuildingCommands
 from Commands import UnitsCommands
 from Commands import ActionCommands
 from Commands import BattleCommands
-from State import State
+import socket
+import thread
+import sys
+import getpass
+import Config
+import Control
+import State
 
-class Console():  
+class Console():
+    history = InMemoryHistory()  
     commands = []
     commands_completer = ()
     level = 0
@@ -197,7 +197,8 @@ class Client:
                     pass_msg = prompt(': ', is_password=True)
                     sock.sendall(pass_msg)
                 elif data.find(Control.CTRL_INPUT) != -1:
-                    msg = prompt(': ', completer=Console.commands_completer)
+                    msg = prompt(': ', history=Console.history, enable_history_search=True, completer=Console.commands_completer)
+                    Console.history.append(msg)
                     sock.sendall(msg)
                 elif data.find(Control.CTRL_MENU) != -1:
                     Client.state = State.MENU

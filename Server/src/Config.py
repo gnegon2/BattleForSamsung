@@ -14,7 +14,7 @@ global debug
 debug = True
 
 global port
-port = 50000
+port = 50003
 
 global worldMapSize
 worldMapSize = 10

@@ -1,12 +1,14 @@
 from BattleMap import BattleMap
 from LocalMapStruct import localMaps
-import Config
-from Log import Log
-from Control import Type
-from Buildings import Buildings
-from Utility import Utility
 from Commands import BattleCommands
-from Control import Control
+import Config
+import Log
+import Buildings
+import Utility
+import Control
+import Units
+import Statistics
+import Geo
 
 class Battle():
     
@@ -17,6 +19,9 @@ class Battle():
         self.army = army
         self.worldPosY = worldPosY
         self.worldPosX = worldPosX
+        self.central = localMaps[self.worldPosY][self.worldPosX]
+        if self.army['OnNorth']:
+            self.north = localMaps[self.worldPosY - 1][self.worldPosX]
     
     def Start(self):
         Log.Save("Start battle on field: "+ str(self.worldPosY) + " " + str(self.worldPosX) + "!\n")
@@ -30,68 +35,156 @@ class Battle():
         
         Utility.SendMsg(self.attacker, Control.CTRL_BATTLE_MENU)
         command = Utility.SendMsg(self.attacker, Control.CTRL_INPUT)
-
+        
+        self.AttackerInit()
         while True:
             if command == BattleCommands.MAKE_MOVE:
                 battleMap.ShowBattleMap()
                 command = Utility.SendMsg(self.attacker, Control.CTRL_INPUT)
-            if self.army['OnNorth']:
-                self.AttackerNorthMove()
-
+            
+            self.AttackerPrepare()
+            while True:
+                if not self.AttackerMove():
+                    break
+     
+    def AttackerInit(self):
+        print "AttackerInit\n"
+        if self.army['OnNorth']:
+            self.AttackerNorthInit() 
+                      
+    def AttackerNorthInit(self):
+        print "AttackerNorthInit\n"
+        for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
+            for y in range(3 * Config.localMapSize / 4, Config.localMapSize):
+                instance = self.north.fields[y][x]
+                if isinstance(instance, Units.Unit):
+                    instance.army = Geo.NORTH
+                    
+    def AttackerPrepare(self):
+        print "AttackerPrepare\n"
+        if self.army['OnNorth']:
+            self.AttackerNorthPrepare()
+    
+    def AttackerNorthPrepare(self):
+        print "AttackerNorthPrepare\n"
+        for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
+            for y in range(3 * Config.localMapSize / 4, Config.localMapSize):
+                instance = self.north.fields[y][x]
+                if isinstance(instance, Units.Unit):
+                    instance.move = instance.statistics[Statistics.Speed]
+                    instance.attacked = False
+                    
+        for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
+            for y in range(0, Config.localMapSize/2):
+                instance = self.central.fields[y][x] 
+                if isinstance(instance, Units.Unit) and instance.army == Geo.NORTH:
+                    instance.move = instance.statistics[Statistics.Speed]
+                    instance.attacked = False
+     
+    def AttackerMove(self):
+        print "AttackerMove\n"
+        moved = False
+        if self.army['OnNorth']: 
+            if self.AttackerNorthMove():
+                moved = True
+        return moved
         
     def AttackerNorthMove(self):
-        localMapStruct = localMaps[self.worldPosY][self.worldPosX]
+        print "AttackerNorthMove\n"
+        moved = False
         print "Moving army on north"
-        localMapStructNorth = localMaps[self.worldPosY - 1][self.worldPosX]
         for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
-            y = 3 * Config.localMapSize / 4
-            while y < Config.localMapSize:
-                instance = localMapStructNorth.fields[y][x]
-                if instance.type == Type.UNIT:       
-                    print "instance = " + str(instance)
-                    print y, x
-                    y_instance = y
-                    movedToNextMap = False
-                    for y_move in range(instance.speed):
-                        print "y_instance = " + str(y_instance)
-                        next_field = y_instance + 1
-                        if next_field < Config.localMapSize:
-                            destInstance = localMapStructNorth.fields[next_field][x]
-                            print "destInstance = " + str(destInstance)
-                            if isinstance(destInstance, Buildings.Empty):
-                                print "Movin!"
-                                instance.moved = True
-                                localMapStructNorth.fields[next_field][x] = instance
-                                localMapStructNorth.fields[y_instance][x] = Buildings.Empty()
-                                y_instance += 1
-                                y += 1 
-                            else:
-                                break
-                        else:
-                            destInstance = localMapStruct.fields[0][x]
-                            if isinstance(destInstance, Buildings.Empty):
-                                print "Movin!"
-                                instance.moved = True
-                                localMapStruct.fields[0][x] = instance
-                                localMapStructNorth.fields[y_instance][x] = Buildings.Empty()
-                                y_instance = 0
-                                if y_move < instance.speed - 1:
-                                    movedToNextMap = True
-                    if movedToNextMap:
-                        y_instance = 0
-                        for y_move in range(Config.localMapSize - y - 2 + instance.speed):
-                            next_field = y_instance + 1
-                            destInstance = localMapStruct.fields[next_field][x]
-                            print "destInstance = " + str(destInstance)
-                            if isinstance(destInstance, Buildings.Empty):
-                                print "Movin!"
-                                localMapStruct.fields[next_field][x] = instance
-                                localMapStruct.fields[y_instance][x] = Buildings.Empty()
-                                y_instance += 1
-                                y += 1 
-                            else:
-                                break
-                y += 1            
+            for y in range(3 * Config.localMapSize / 4, Config.localMapSize):
+                instance = self.north.fields[y][x] 
+                if isinstance(instance, Units.Unit) and instance.move > 0:
+                    nextField = y + 1
+                    if nextField < Config.localMapSize:
+                        destIns = self.north.fields[nextField][x] 
+                        if isinstance(destIns, Buildings.Empty):
+                            self.north.fields[nextField][x] = instance
+                            self.north.fields[y][x] = Buildings.Empty()
+                            instance.move -= 1
+                            moved = True
+                    else:
+                        destIns = self.central.fields[0][x]
+                        if isinstance(destIns, Buildings.Empty):
+                            self.central.fields[0][x] = instance
+                            self.north.fields[y][x] = Buildings.Empty()
+                            instance.move -= 1
+                            moved = True
+        print "Moving north army on central"                       
+        for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
+            for y in range(0, Config.localMapSize/2):
+                instance = self.central.fields[y][x] 
+                if isinstance(instance, Units.Unit) and instance.army == Geo.NORTH and instance.move > 0:
+                    nextField = y + 1
+                    if nextField < Config.localMapSize/2:
+                        destIns = self.central.fields[nextField][x]
+                        if isinstance(destIns, Buildings.Empty):
+                            self.central.fields[nextField][x] = instance
+                            self.central.fields[y][x] = Buildings.Empty()
+                            instance.move -= 1
+                            moved = True
+                    else:
+                        if x < Config.localMapSize/2:
+                            nextField = x + 1
+                            destIns = self.central.fields[y][nextField]
+                            if isinstance(destIns, Buildings.Empty):
+                                self.central.fields[nextField][x] = instance
+                                self.central.fields[y][x] = Buildings.Empty()
+                                instance.move -= 1
+                                moved = True
+                        elif x > Config.localMapSize/2:
+                            nextField = x - 1
+                            destIns = self.central.fields[y][nextField]
+                            if isinstance(destIns, Buildings.Empty):
+                                self.central.fields[nextField][x] = instance
+                                self.central.fields[y][x] = Buildings.Empty()
+                                instance.move -= 1
+                                moved = True
+        return moved
+    
+    def AttackerAttack(self):
+        print "AttackerAttack\n"
+        if self.army['OnNorth']:
+            self.AttackerNorthAttack()
+    
+    def AttackerNorthAttack(self):
+        print "AttackerNorthAttack\n"
+        for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
+            for y in range(3 * Config.localMapSize / 4, Config.localMapSize):
+                instance = self.north.fields[y][x] 
+                if isinstance(instance, Units.Unit) and not instance.attacked:
+                    succes, y_enemy, x_enemy = self.FindFirstEnemyNorth(y, x, instance.statistics[Statistics.Range])
+                    
+                    
+    def FindFirstEnemyNorth(self, y, x, attack_range):
+        for y_range in range(attack_range + 1):
+            for x_range in (attack_range + 1):
+                
+        
+                        
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+    
+        
                     
         
         

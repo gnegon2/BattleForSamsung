@@ -1,9 +1,9 @@
 from Resources import Resources
-from Control import Control
-from Utility import Utility
-from Data import Data
 from UserInfo import UserInfo
-from State import State
+import Control
+import Utility
+import Data
+import State
 
 class Player():
     def __init__(self, connection):
@@ -13,7 +13,6 @@ class Player():
     
     def InitUserInfo(self):
         self.info = UserInfo()
-        
         Data.users_info.append((self.username, self.info))
     
     def LoadUserInfo(self):
@@ -23,11 +22,7 @@ class Player():
         
     def InitResources(self):
         self.resources = Resources()
-        self.resources.Add(Resources.GOLD, 2500)
-        self.resources.Add(Resources.WOOD, 100)
-        self.resources.Add(Resources.STONE, 100)
-        self.resources.Add(Resources.CRYSTALS, 50)
-        
+        self.resources.Init(2500, 100, 100, 50)
         Data.resources.append((self.username, self.resources))
         
     def LoadResources(self):
@@ -35,10 +30,40 @@ class Player():
             if username_arg == self.username:
                 self.resources = resources_arg
     
-    def ShowResources(self):
+    def ShowResources(self):        
         Utility.SendMsg(self, Control.CTRL_COLOR_GREEN + "Resources:\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_GOLD + "Gold: " + str(self.resources.gold) + "\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_BROWN + "Wood: " + str(self.resources.wood) + "\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_STEEL + "Stone: " + str(self.resources.stone) + "\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_VIOLET + "Crystals: " + str(self.resources.crystals) + "\n")       
+        for resType, resAmount in self.resources.iteritems():
+            Utility.SendMsg(self, resType.color + resType.name + " = " + str(resAmount) + "\n")
+        
+        Utility.SendMsg(self, Control.CTRL_COLOR_GREEN + "UserInfo:\n")
+        Utility.SendMsg(self, Control.CTRL_COLOR_GOLD + "buildingsBuildToday: " + str(self.info.buildingsBuildToday) + "\n")
+        Utility.SendMsg(self, Control.CTRL_COLOR_BROWN + "unitsRecruitedToday: " + str(self.info.unitsRecruitedToday) + "\n")
+        Utility.SendMsg(self, Control.CTRL_COLOR_STEEL + "maxNumberOfUnits: " + str(self.info.maxNumberOfUnits) + "\n")
+        Utility.SendMsg(self, Control.CTRL_COLOR_VIOLET + "numberOfUnits: " + str(self.info.numberOfUnits) + "\n")   
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         

@@ -1,6 +1,6 @@
-from WorldMap import WorldMap
+import WorldMap
 from LocalMapStruct import localMaps
-from Units import Units
+import Units
 
 def Init(player):
     # Fortress
@@ -15,8 +15,8 @@ def Init(player):
     
     # North
     localMaps[0][1].fields[19][10] = Units.Peasant(player)
-    localMaps[0][1].fields[18][9] = Units.Peasant(player)
-    localMaps[0][1].fields[17][8] = Units.Peasant(player)
+    localMaps[0][1].fields[18][9] = Units.Crossbowman(player)
+    localMaps[0][1].fields[17][8] = Units.Horseman(player)
     
     
     localMaps[2][1].fields[0][9] = Units.Peasant(player)
