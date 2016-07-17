@@ -1,138 +1,141 @@
+from Colors import Colors
 import Control
 
-class MenuCommands():
-    REGISTER = "Register"
-    LOGIN = "Login"
-    EXIT = "Exit"
+def ControlToCommands(data):
+    if data.find(Control.CTRL_MENU_MAIN) != -1:
+        return MenuCommands
+    elif data.find(Control.CTRL_MENU_WORLD_MAP) != -1:
+        return WorldMapCommands
+    elif data.find(Control.CTRL_MENU_LOCAL_MAP) != -1:
+        return LocalMapCommands
+    elif data.find(Control.CTRL_MENU_BUILDING) != -1:
+        return BuildingCommands
+    elif data.find(Control.CTRL_MENU_UNITS) != -1:
+        return UnitsCommands
+    elif data.find(Control.CTRL_MENU_ACTION) != -1:
+        return ActionCommands
+    elif data.find(Control.CTRL_MENU_BATTLE) != -1:
+        return BattleCommands
+    elif data.find(Control.CTRL_MENU_SCOUTING_MODE) != -1:
+        return ScoutingCommands
+    else:
+        return Empty
+
+class Empty():
     
     @staticmethod
-    def Get():
-        commands = Control.CTRL_COLOR_ORANGE
-        commands += MenuCommands.REGISTER + "\n"
-        commands += MenuCommands.LOGIN + "\n"
-        commands += MenuCommands.EXIT + "\n"
-        return commands
+    def Color():
+        return Colors.COLOR_WHITE
+    
+class MenuCommands():
+    _0_0_REGISTER = "Register"
+    _1_0_LOGIN = "Login"
+    _2_0_EXIT = "Exit"
+    
+    @staticmethod
+    def Color():
+        return Colors.COLOR_ORANGE
 
 class MainCommands:
-    SHOW_MAP = "ShowMap"
-    SHOW_RESOURCES = "ShowResources"
-    RETURN = "Return"
-    EXIT = "Exit"
+    _0_0_SHOW_MAP = "ShowMap"
+    _1_0_SHOW_RESOURCES = "ShowResources"
+    _2_0_RETURN = "Return"
+    _3_0_EXIT = "Exit"
     
     @staticmethod
-    def Get():
-        commands = Control.CTRL_COLOR_STEEL
-        commands += MainCommands.SHOW_MAP + "\n"
-        commands += MainCommands.SHOW_RESOURCES + "\n"
-        commands += MainCommands.RETURN + "\n"
-        commands += MainCommands.EXIT + "\n"
-        return commands
+    def Color():
+        return Colors.COLOR_STEEL
     
 class WorldMapCommands:
-    GET_PRODUCTION = "GetProduction"
-    ENTER_FORTRESS = "EnterFortress"
-    SETTLE_FORTRESS = "SettleFortress"
-    SHOW_FORTRESS_INFO = "ShowFortressInfo"
-    ATTACK_FORTRESS = "AttackFortress"
+    _0_0_SHOW_FORTRESS_INFO = "ShowFortressInfo"
+    _1_2_SETTLE_FORTRESS = "SettleFortress"
+    _2_2_ENTER_FORTRESS = "EnterFortress"
+    _3_0_GET_PRODUCTION = "GetProduction"
+    _4_2_ATTACK_FORTRESS = "AttackFortress"
     
     @staticmethod
-    def Get():
-        commands = Control.CTRL_COLOR_VIOLET
-        commands += WorldMapCommands.GET_PRODUCTION + "\n"
-        commands += WorldMapCommands.SHOW_FORTRESS_INFO + "\n"
-        commands += WorldMapCommands.ENTER_FORTRESS + " Y X\n"
-        commands += WorldMapCommands.SETTLE_FORTRESS + " Y X\n"
-        commands += WorldMapCommands.ATTACK_FORTRESS + " Y X\n"
-        return commands
+    def Color():
+        return Colors.COLOR_VIOLET
     
 class LocalMapCommands:
-    BUILDINGS = "Buildings"
-    ARMY = "Army" 
-    DESTROY = "Destroy"
+    _0_0_BUILDINGS = "Buildings"
+    _1_0_ARMY = "Army" 
+    _2_2_DESTROY = "Destroy"
     
     @staticmethod
-    def Get():
-        commands = Control.CTRL_COLOR_VIOLET
-        commands += LocalMapCommands.BUILDINGS + "\n"
-        commands += LocalMapCommands.ARMY + "\n"
-        commands += LocalMapCommands.DESTROY + " Y X\n"
-        return commands
+    def Color():
+        return Colors.COLOR_VIOLET
     
 class BuildingCommands:
-    HOUSE = "House"
-    BANK = "Bank"
-    SAW_MILL = "SawMill"
-    LIBRARY = "Library"
-    MINE = "Mine"
-    CRYSTAL_MINE = "CrystalMine"
-    WALL = "Wall"
-    TOWER = "Tower"
+    _0_0_HOUSE = "House"
+    _1_0_BANK = "Bank"
+    _2_0_SAW_MILL = "SawMill"
+    _3_0_MINE = "Mine"
+    _4_0_CRYSTAL_MINE = "CrystalMine"
+    _5_0_WALL = "Wall"
+    _6_0_TOWER = "Tower"
+    _7_0_LIBRARY = "Library"
     
     @staticmethod
-    def Get():
-        commands = Control.CTRL_COLOR_ORANGE
-        commands += BuildingCommands.HOUSE + "\n"
-        commands += BuildingCommands.BANK + "\n"
-        commands += BuildingCommands.SAW_MILL + "\n"
-        commands += BuildingCommands.LIBRARY + "\n"
-        commands += BuildingCommands.MINE + "\n"
-        commands += BuildingCommands.CRYSTAL_MINE + "\n"
-        commands += BuildingCommands.WALL + "\n"
-        commands += BuildingCommands.TOWER + "\n"
-        return commands
+    def Color():
+        return Colors.COLOR_ORANGE
     
 class UnitsCommands:
-    MOVE_UNIT = "MoveUnit"
-    PEASANT = "Peasant"
-    ARCHER = "Archer"
-    SWORDMAN = "Swordman"
-    PIKEMAN = "Pikeman"
-    CROSSBOWMAN = "Crossbowman"
-    HORSEMAN = "Horseman"
-    CATAPULT = "Catapult"
-    CANNON = "Cannon"
+    _0_4_MOVE_UNIT = "MoveUnit"
+    _1_0_PEASANT = "Peasant"
+    _2_0_ARCHER = "Archer"
+    _3_0_SWORDMAN = "Swordman"
+    _4_0_PIKEMAN = "Pikeman"
+    _5_0_CROSSBOWMAN = "Crossbowman"
+    _6_0_HORSEMAN = "Horseman"
+    _7_0_CATAPULT = "Catapult"
+    _8_0_CANNON = "Cannon"
     
     @staticmethod
-    def Get(level):
-        commands = Control.CTRL_COLOR_ORANGE
-        commands += UnitsCommands.MOVE_UNIT + " Y1 X1 Y2 X2\n"
-        commands += UnitsCommands.PEASANT + "\n"
-        if level > 0:
-            commands += UnitsCommands.ARCHER + "\n"
-        if level > 1:
-            commands += UnitsCommands.SWORDMAN + "\n"
-        if level > 2:
-            commands += UnitsCommands.PIKEMAN + "\n"
-        if level > 3:
-            commands += UnitsCommands.CROSSBOWMAN + "\n"
-        if level > 4:
-            commands += UnitsCommands.HORSEMAN + "\n"
-        if level > 5:
-            commands += UnitsCommands.CATAPULT + "\n"
-        if level > 6:
-            commands += UnitsCommands.CANNON + "\n"
-        return commands
+    def Color():
+        return Colors.COLOR_ORANGE
 
 class ActionCommands:
-    SHOW_INFO = "ShowInfo"
-    CREATE = "Create"
+    _0_0_SHOW_INFO = "ShowInfo"
+    _1_2_CREATE = "Create"
     
     @staticmethod
-    def Get():
-        commands = Control.CTRL_COLOR_ORANGE
-        commands += ActionCommands.SHOW_INFO + "\n"
-        commands += ActionCommands.CREATE + " Y X\n"
-        return commands
+    def Color():
+        return Colors.COLOR_ORANGE
     
 class BattleCommands:
-    QUICK_BATTLE = "QuickBattle"
-    MAKE_MOVE = "MakeMove"
+    _0_0_QUICK_BATTLE = "QuickBattle"
+    _1_0_MAKE_MOVE = "MakeMove"
     
     @staticmethod
-    def Get():
-        commands = Control.CTRL_COLOR_ORANGE
-        commands += BattleCommands.QUICK_BATTLE + "\n"
-        commands += BattleCommands.MAKE_MOVE + "\n"
-        return commands
-        
+    def Color():
+        return Colors.COLOR_ORANGE
+
+class ScoutingCommands:
+    _0_0_SHOW_ENEMY_INFO = "ShowEnemyInfo"
+    
+    @staticmethod
+    def Color():
+        return Colors.COLOR_BLOOD
+
+def GetCommands(commands):
+    msg = ""
+    for key, value in sorted(vars(commands).iteritems()):
+        if not (key.startswith('__')) and isinstance(value, basestring):
+            if key[3] == "0":
+                msg += commands.Color() + value + "\n"
+            elif key[3] == "2":
+                msg += commands.Color() + value + " Y X\n"
+            elif key[3] == "4":
+                msg += commands.Color() + value + " Y1 X1 Y2 X2\n" 
+    return msg  
+
+def GetUnitCommands(level):
+    msg = ""
+    for key, value in sorted(vars(UnitsCommands).iteritems()):
+        if not (key.startswith('__')) and isinstance(value, basestring):
+            unit_level = int(key[1])
+            if unit_level <= level:
+                msg += UnitsCommands.Color() + value + "\n" 
+    return msg  
         

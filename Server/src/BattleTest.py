@@ -1,24 +1,28 @@
+from Pos import Pos
 import WorldMap
-from LocalMapStruct import localMaps
 import Units
+import Map
 
 def Init(player):
     # Fortress
-    WorldMap.SettleFortress(player, 1, 1)
+    if player.username == "test":
+        WorldMap.SettleFortress(player, 1, 1)
+        Map.Set(player, Units.Peasant, Pos(1, 1, 0, 10))
+        
     
-    WorldMap.SettleFortress(player, 0, 1)
-    WorldMap.SettleFortress(player, 2, 1)
-    WorldMap.SettleFortress(player, 1, 0)
-    WorldMap.SettleFortress(player, 1, 2)
+    if player.username == "mateusz":
+        WorldMap.SettleFortress(player, 0, 1)
+        #WorldMap.SettleFortress(player, 2, 1)
+        #WorldMap.SettleFortress(player, 1, 0)
+        #WorldMap.SettleFortress(player, 1, 2)
     
-    # Units
-    
-    # North
-    localMaps[0][1].fields[19][10] = Units.Peasant(player)
-    localMaps[0][1].fields[18][9] = Units.Crossbowman(player)
-    localMaps[0][1].fields[17][8] = Units.Horseman(player)
-    
-    
-    localMaps[2][1].fields[0][9] = Units.Peasant(player)
-    localMaps[1][0].fields[9][17] = Units.Peasant(player)
-    localMaps[1][2].fields[9][0] = Units.Peasant(player)
+        # Units
+        
+        # North
+        Map.Set(player, Units.Peasant, Pos(0, 1, 19, 10))
+        Map.Set(player, Units.Crossbowman, Pos(0, 1, 18, 13))
+        Map.Set(player, Units.Horseman, Pos(0, 1, 17, 6))
+        
+        #Map.Set(2, 1,  0,  9, Units.Peasant(player))
+        #Map.Set(1, 0,  9, 17, Units.Peasant(player))
+        #Map.Set(1, 2,  9,  0, Units.Peasant(player))

@@ -1,83 +1,77 @@
+from Colors import Colors
+import Commands
+from Commands import MainCommands, BuildingCommands
+from Commands import LocalMapCommands
+from Commands import ActionCommands
+from Commands import UnitsCommands
+from Pos import Pos
 import Buildings
 import Units
 import Utility
 import Control
 import State
-from Commands import MainCommands
-from Commands import LocalMapCommands
-from Commands import BuildingCommands
-from Commands import ActionCommands
-from Commands import UnitsCommands
-from LocalMapStruct import localMaps
 import Config
 import re
 import time
-
-def InitMap(player, y, x):        
-    localMapStruct = localMaps[y][x]
-    localMapStruct.fields[Config.localMapSize / 2 - 1][Config.localMapSize / 2 - 1] = Buildings.Fortress(player)
-    localMapStruct.fields[Config.localMapSize / 2 - 1][Config.localMapSize / 2] = Buildings.Fortress(player)
-    localMapStruct.fields[Config.localMapSize / 2][Config.localMapSize / 2 - 1] = Buildings.Fortress(player)
-    localMapStruct.fields[Config.localMapSize / 2][Config.localMapSize / 2] = Buildings.Fortress(player)
+import Map
  
 def ParseCommandXY(player, command):
     try:
         y, x = map(int, re.findall(r'\d+', command))
-        if 0 <= x < Config.localMapSize and 0 <= y < Config.localMapSize:
+        if 0 <= x < Map.end and 0 <= y < Map.end:
             return True, y, x
         else:
-            if not 0 <= x < Config.localMapSize:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + \
-                                "Value X out of range! X must be in range: 0 - " + str(Config.localMapSize - 1) + "\n")
+            if not 0 <= x < Map.end:
+                Utility.SendMsg(player, Colors.COLOR_RED + \
+                                "Value X out of range! X must be in range: 0 - " + str(Map.end - 1) + "\n")
                 return False, 0, 0
-            if not 0 <= y < Config.localMapSize:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + \
-                                "Value Y out of range! Y must be in range: 0 - " + str(Config.localMapSize - 1) + "\n")
+            if not 0 <= y < Map.end:
+                Utility.SendMsg(player, Colors.COLOR_RED + \
+                                "Value Y out of range! Y must be in range: 0 - " + str(Map.end - 1) + "\n")
                 return False, 0, 0
     except ValueError:
-        Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Bad number of arguments! Provide exactly two arguments!\n")
+        Utility.SendMsg(player, Colors.COLOR_RED + "Bad number of arguments! Provide exactly two arguments!\n")
         return False, 0, 0
  
 def ExecuteCommand(player, command):
     # MainCommands >>>
-    if command == MainCommands.SHOW_MAP:
+    if command == MainCommands._0_0_SHOW_MAP:
         ShowMap(player)
-    elif command == MainCommands.SHOW_RESOURCES:
+    elif command == MainCommands._1_0_SHOW_RESOURCES:
         player.ShowResources()
-    elif command == MainCommands.RETURN:
-        Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Returning to World Map!\n")
+    elif command == MainCommands._2_0_RETURN:
+        Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to World Map!\n")
         player.state = State.WORLD_MAP
-    elif command == MainCommands.EXIT:
+    elif command == MainCommands._3_0_EXIT:
         Utility.SendMsg(player, Control.CTRL_EXIT)
         player.state = State.EXITING
     # MainCommands <<<   
-    elif command == LocalMapCommands.BUILDINGS:
+    elif command == LocalMapCommands._0_0_BUILDINGS:
         BuildingMenu(player)
-    elif command == LocalMapCommands.ARMY:
+    elif command == LocalMapCommands._1_0_ARMY:
         UnitsMenu(player)
-    elif command.find(LocalMapCommands.DESTROY) != -1:
+    elif command.find(LocalMapCommands._2_2_DESTROY) != -1:
         Destroy(player, command)
     else:
-        Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Undefined command!\n")
+        Utility.SendMsg(player, Colors.COLOR_RED + "Undefined command!\n")
    
 def ShowMap(player):     
-    localMapStruct = localMaps[player.localMapY][player.localMapX]
     row, col = 0, 0
-    mapMsg = Control.CTRL_COLOR_WHITE + "  "
-    for x in range(0, Config.localMapSize):
+    mapMsg = Colors.COLOR_WHITE + "  "
+    for x in range(Map.end):
         if col < 10:
             mapMsg += " "
-        mapMsg += Control.CTRL_COLOR_WHITE + str(col)
+        mapMsg += Colors.COLOR_WHITE + str(col)
         mapMsg += " "
         col += 1
     mapMsg += "\n"
-    for y in range(0, Config.localMapSize):
+    for y in range(Map.end):
         if row < 10:
             mapMsg += " "
-        mapMsg += Control.CTRL_COLOR_WHITE + str(row)
+        mapMsg += Colors.COLOR_WHITE + str(row)
         row += 1
-        for x in range(0, Config.localMapSize):   
-            instance = localMapStruct.fields[y][x]
+        for x in range(0, Map.end):   
+            instance = Map.Get(Pos(player.wy, player.wx, y, x))
             mapMsg += " "
             mapMsg += instance.color + instance.field
             mapMsg += " "
@@ -85,85 +79,85 @@ def ShowMap(player):
     Utility.SendMsg(player, mapMsg)
 
 def BuildingMenu(player):
-    buildingMenu = Control.CTRL_COLOR_AZURE
+    buildingMenu = Colors.COLOR_AZURE
     buildingMenu += "Welcome in Building Menu!\n"
     buildingMenu += "available options are:\n"
     Utility.SendMsg(player, buildingMenu)
-    Utility.SendMsg(player, BuildingCommands.Get())
-    Utility.SendMsg(player, MainCommands.Get())
+    Utility.SendMsg(player, Commands.GetCommands(BuildingCommands))
+    Utility.SendMsg(player, Commands.GetCommands(MainCommands))
+    
     
     player.state = State.BUILDING_MENU
     while player.state == State.BUILDING_MENU:
-        Utility.SendMsg(player, Control.CTRL_BUILDING_MENU)
+        Utility.SendMsg(player, Control.CTRL_MENU_BUILDING)
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         # MainCommands >>>
-        if command == MainCommands.SHOW_MAP:
+        if command == MainCommands._0_0_SHOW_MAP:
             ShowMap(player)
-        elif command == MainCommands.SHOW_RESOURCES:
+        elif command == MainCommands._1_0_SHOW_RESOURCES:
             player.ShowResources()
-        elif command == MainCommands.RETURN:
+        elif command == MainCommands._2_0_RETURN:
             player.state = State.LOCAL_MAP
-            Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Returning to Local Map!\n")
-        elif command == MainCommands.EXIT:
+            Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Local Map!\n")
+        elif command == MainCommands._3_0_EXIT:
             Utility.SendMsg(player, Control.CTRL_EXIT)
             player.state = State.EXITING
         # MainCommands <<<
         else:
             building = Buildings.CommandToBuilding(command)
             if isinstance(building, Buildings.Empty):
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Undefined building!\n")
+                Utility.SendMsg(player, Colors.COLOR_RED + "Undefined building!\n")
             else:
                 BuildingActionMenu(player, building)
 
 def BuildingActionMenu(player, building):
-    actionsMenu = Control.CTRL_COLOR_AZURE
+    actionsMenu = Colors.COLOR_AZURE
     actionsMenu += "available actions on buildings are:\n"
     Utility.SendMsg(player, actionsMenu)
-    Utility.SendMsg(player, ActionCommands.Get())
-    Utility.SendMsg(player, MainCommands.Get())
+    Utility.SendMsg(player, Commands.GetCommands(ActionCommands))
+    Utility.SendMsg(player, Commands.GetCommands(MainCommands))
     
     player.state = State.BUILDING_ACTION_MENU
     while player.state == State.BUILDING_ACTION_MENU:
-        Utility.SendMsg(player, Control.CTRL_BUILDING_ACTION_MENU)
+        Utility.SendMsg(player, Control.CTRL_MENU_ACTION)
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         # MainCommands >>>
-        if command == MainCommands.SHOW_MAP:
+        if command == MainCommands._0_0_SHOW_MAP:
             ShowMap(player)
-        elif command == MainCommands.SHOW_RESOURCES:
+        elif command == MainCommands._1_0_SHOW_RESOURCES:
             player.ShowResources()
-        elif command == MainCommands.RETURN:
+        elif command == MainCommands._2_0_RETURN:
             player.state = State.BUILDING_MENU
-            Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Returning to Building Menu!\n")
-        elif command == MainCommands.EXIT:
+            Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Building Menu!\n")
+        elif command == MainCommands._3_0_EXIT:
             Utility.SendMsg(player, Control.CTRL_EXIT)
             player.state = State.EXITING
         # MainCommands <<<
-        elif command == ActionCommands.SHOW_INFO:
+        elif command == ActionCommands._0_0_SHOW_INFO:
                 Buildings.ShowInfo(player, building)
-        elif command.find(ActionCommands.CREATE) == 0:
+        elif command.find(ActionCommands._1_2_CREATE) == 0:
             succes, y, x = ParseCommandXY(player, command)
             if succes:
                 CreateBuilding(player, building, y, x)
         else:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Undefined action!\n")
+            Utility.SendMsg(player, Colors.COLOR_RED + "Undefined action!\n")
 
 def CreateBuilding(player, building, y, x):
     CheckLastBuild(player)
     if player.info.buildingsBuildToday < Config.maxBuildingsPerDay:
-        localMapStruct = localMaps[player.localMapY][player.localMapX]
-        if isinstance(localMapStruct.fields[y][x], Buildings.Empty):
-            if Buildings.Build(player, building): 
-                player.info.buildingsBuildToday += 1
-                print "player.info.buildingsBuildToday=" + str(player.info.buildingsBuildToday)
-                localMapStruct.fields[y][x] = building(player)
-                Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Building created!\n") 
+        pos = Pos(player.wy, player.wx, y, x)
+        field = Map.Get(pos)
+        if isinstance(field, Buildings.Empty):
+            if Buildings.Pay(player, building): 
+                Map.Set(player, building, pos)
+                Utility.SendMsg(player, Colors.COLOR_GREEN + "Building created!\n") 
             else:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Not enough resources!\n") 
+                Utility.SendMsg(player, Colors.COLOR_RED + "Not enough resources!\n") 
         else:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Field is not empty!\n") 
+            Utility.SendMsg(player, Colors.COLOR_RED + "Field is not empty!\n") 
     else:
-        Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You have built maximum buildings today!\n")     
- 
+        Utility.SendMsg(player, Colors.COLOR_RED + "You have built maximum buildings today!\n")     
+        
 def CheckLastBuild(player):
     actualTime = time.localtime(time.time())
     if player.info.LastBuild.tm_year < actualTime.tm_year or \
@@ -173,101 +167,103 @@ def CheckLastBuild(player):
             player.info.LastBuild = actualTime
             player.info.buildingsBuildToday = 0
         
-def GetProduction(player, y, x):
-    localMapStruct = localMaps[y][x]
-    for y in range(0, Config.localMapSize):
-        for x in range(0, Config.localMapSize):
-            building = localMapStruct.fields[y][x]
-            if isinstance(building, Buildings.Building):
+def GetProduction(player, wy, wx):
+    fort = Map.GetFort(wy, wx)
+    for y in range(Map.end):
+        for x in range(Map.end):
+            building = Map.Get(Pos(wy, wx, y, x))
+            if isinstance(building, Buildings.Building) and \
+                not isinstance(building, Buildings.Fortress):
                 Buildings.GetProduction(player, building)
                                  
 def UnitsMenu(player):
-    level = localMaps[player.localMapY][player.localMapX].librariesCount
+    level = Map.GetFort(player.wy, player.wx).level
     
-    unitsMenu = Control.CTRL_COLOR_AZURE
+    unitsMenu = Colors.COLOR_AZURE
     unitsMenu += "Welcome in Units Menu!\n"
     unitsMenu += "available options are:\n"
     Utility.SendMsg(player, unitsMenu)
-    Utility.SendMsg(player, UnitsCommands.Get(level))
-    Utility.SendMsg(player, MainCommands.Get())
+    Utility.SendMsg(player, Commands.GetUnitCommands(level))
+    Utility.SendMsg(player, Commands.GetCommands(MainCommands))
     
     player.state = State.UNITS_MENU
     while player.state == State.UNITS_MENU:
-        
-        Utility.SendMsg(player, Control.CTRL_UNITS_MENU + str(level))
+        Utility.SendMsg(player, Control.CTRL_MENU_UNITS + str(level))
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         # MainCommands >>>
-        if command == MainCommands.SHOW_MAP:
+        if command == MainCommands._0_0_SHOW_MAP:
             ShowMap(player)
-        elif command == MainCommands.SHOW_RESOURCES:
+        elif command == MainCommands._1_0_SHOW_RESOURCES:
             player.ShowResources()
-        elif command == MainCommands.RETURN:
+        elif command == MainCommands._2_0_RETURN:
             player.state = State.LOCAL_MAP
-            Utility.SendMsg(player, Control.CTRL_LOCAL_MAP)
-            Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Returning to Local Map!\n")
-        elif command == MainCommands.EXIT:
+            Utility.SendMsg(player, Control.CTRL_MENU_LOCAL_MAP)
+            Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Local Map!\n")
+        elif command == MainCommands._3_0_EXIT:
             Utility.SendMsg(player, Control.CTRL_EXIT)
             player.state = State.EXITING
         # MainCommands <<<
-        elif command.find(UnitsCommands.MOVE_UNIT) != -1:
+        elif command.find(UnitsCommands._0_4_MOVE_UNIT) != -1:
             MoveUnit(player, command)
         else:
-            unit = Units.CommandToUnit(player, command)
-            if isinstance(unit, Units.Empty):
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Undefined unit!\n")
+            unit = Units.CommandToUnit(command)
+            print unit
+            if unit is Units.Empty:
+                Utility.SendMsg(player, Colors.COLOR_RED + "Undefined unit!\n")
             else:
                 UnitsActionMenu(player, unit)
                 
 def UnitsActionMenu(player, unit):  
-    actionsMenu = Control.CTRL_COLOR_AZURE
+    actionsMenu = Colors.COLOR_AZURE
     actionsMenu += "available actions on units are:\n"
-    Utility.SendMsg(player, actionsMenu)     
-    Utility.SendMsg(player, ActionCommands.Get())
-    Utility.SendMsg(player, MainCommands.Get())
+    Utility.SendMsg(player, actionsMenu)  
+    Utility.SendMsg(player, Commands.GetCommands(ActionCommands))
+    Utility.SendMsg(player, Commands.GetCommands(MainCommands))   
     
     player.state = State.UNITS_ACTION_MENU
     while player.state == State.UNITS_ACTION_MENU:
-        Utility.SendMsg(player, Control.CTRL_UNITS_ACTION_MENU)
+        Utility.SendMsg(player, Control.CTRL_MENU_ACTION)
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         # MainCommands >>>
-        if command == MainCommands.SHOW_MAP:
+        if command == MainCommands._0_0_SHOW_MAP:
             ShowMap(player)
-        elif command == MainCommands.SHOW_RESOURCES:
+        elif command == MainCommands._1_0_SHOW_RESOURCES:
             player.ShowResources()
-        elif command == MainCommands.RETURN:
+        elif command == MainCommands._2_0_RETURN:
             player.state = State.UNITS_MENU
-            Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Returning to Units Menu!\n")
-        elif command == MainCommands.EXIT:
+            Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Units Menu!\n")
+        elif command == MainCommands._3_0_EXIT:
             Utility.SendMsg(player, Control.CTRL_EXIT)
             player.state = State.EXITING
         # MainCommands <<<
-        elif command == ActionCommands.SHOW_INFO:
+        elif command == ActionCommands._0_0_SHOW_INFO:
             Units.ShowInfo(player, unit)
-        elif command.find(ActionCommands.CREATE) == 0:
+        elif command.find(ActionCommands._1_2_CREATE) == 0:
             succes, y, x = ParseCommandXY(player, command)
             if succes:
                 RecruitUnit(player, unit, y, x) 
         else:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Undefined action!\n")
+            Utility.SendMsg(player, Colors.COLOR_RED + "Undefined action!\n")
                 
 def RecruitUnit(player, unit, y, x):
     CheckLastRecruit(player)
     if player.info.numberOfUnits <= player.info.maxNumberOfUnits:
         if player.info.unitsRecruitedToday < Config.maxUnitsPerDay:
-            localMapStruct = localMaps[player.localMapY][player.localMapX]
-            if isinstance(localMapStruct.fields[y][x], Buildings.Empty):
+            pos = Pos(player.wy, player.wx, y, x)
+            field = Map.Get(pos)
+            if isinstance(field, Buildings.Empty):
                 if Units.Buy(player, unit):
                     player.info.unitsRecruitedToday += 1
-                    localMapStruct.fields[y][x] = unit(player)
-                    Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Unit recruited!\n") 
+                    Map.Set(player, unit, pos)
+                    Utility.SendMsg(player, Colors.COLOR_GREEN + "Unit recruited!\n") 
                 else:
-                    Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Not enough resources!\n") 
+                    Utility.SendMsg(player, Colors.COLOR_RED + "Not enough resources!\n") 
             else:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Field is not empty!\n") 
+                Utility.SendMsg(player, Colors.COLOR_RED + "Field is not empty!\n") 
         else:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You have recruit maximum units today!\n")   
+            Utility.SendMsg(player, Colors.COLOR_RED + "You have recruit maximum units today!\n")   
     else:
-        Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You have recruit maximum units!\nBuild new houses to recruit more!\n")  
+        Utility.SendMsg(player, Colors.COLOR_RED + "You have recruit maximum units!\nBuild new houses to recruit more!\n")  
 
 def CheckLastRecruit(player):
     actualTime = time.localtime(time.time())
@@ -281,54 +277,56 @@ def CheckLastRecruit(player):
 def Destroy(player, command):
     succes, y, x = ParseCommandXY(player, command)
     if succes:
-        localMapStruct = localMaps[player.localMapY][player.localMapX] 
-        instance = localMapStruct.fields[y][x]
-        if not isinstance(instance, Buildings.Fortress):
-            if isinstance(instance, Buildings.Building) or isinstance(instance, Units.Unit):
-                localMapStruct.fields[y][x] = Buildings.Empty()
-                Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Succesfully destroyed!\n")
+        pos = Pos(player.wy, player.wx, y, x)
+        field = Map.Get(pos)
+        if not isinstance(field, Buildings.Fortress):
+            if isinstance(field, Buildings.Building) or isinstance(field, Units.Unit):
+                Map.SetEmpty(pos)
+                Utility.SendMsg(player, Colors.COLOR_GREEN + "Succesfully destroyed!\n")
             else:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + "This field can't be destroyed!\n")
+                Utility.SendMsg(player, Colors.COLOR_RED + "This field can't be destroyed!\n")
         else:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Fortress can't be destroyed!\n")
-        
+            Utility.SendMsg(player, Colors.COLOR_RED + "Fortress can't be destroyed!\n")
+               
 def ParseCommandFour(player, command):
     try:
         y1, x1, y2, x2, = map(int, re.findall(r'\d+', command))
-        if 0 <= x1 < Config.localMapSize and 0 <= y1 < Config.localMapSize and \
-           0 <= x2 < Config.localMapSize and 0 <= y2 < Config.localMapSize: 
+        if 0 <= x1 < Map.end and 0 <= y1 < Map.end and \
+           0 <= x2 < Map.end and 0 <= y2 < Map.end: 
             return True, y1, x1, y2, x2
         else:
-            if not 0 <= x1 < Config.localMapSize:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + \
-                                "Value X1 out of range! X1 must be in range: 0 - " + str(Config.localMapSize - 1) + "\n")
+            if not 0 <= x1 < Map.end:
+                Utility.SendMsg(player, Colors.COLOR_RED + \
+                                "Value X1 out of range! X1 must be in range: 0 - " + str(Map.end - 1) + "\n")
                 return False, 0, 0
-            if not 0 <= x2 < Config.localMapSize:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + \
-                                "Value X2 out of range! X2 must be in range: 0 - " + str(Config.localMapSize - 1) + "\n")
+            if not 0 <= x2 < Map.end:
+                Utility.SendMsg(player, Colors.COLOR_RED + \
+                                "Value X2 out of range! X2 must be in range: 0 - " + str(Map.end - 1) + "\n")
                 return False, 0, 0
-            if not 0 <= y1 < Config.localMapSize:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + \
-                                "Value Y1 out of range! Y1 must be in range: 0 - " + str(Config.localMapSize - 1) + "\n")
+            if not 0 <= y1 < Map.end:
+                Utility.SendMsg(player, Colors.COLOR_RED + \
+                                "Value Y1 out of range! Y1 must be in range: 0 - " + str(Map.end - 1) + "\n")
                 return False, 0, 0
-            if not 0 <= y2 < Config.localMapSize:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + \
-                                "Value Y2 out of range! Y2 must be in range: 0 - " + str(Config.localMapSize - 1) + "\n")
+            if not 0 <= y2 < Map.end:
+                Utility.SendMsg(player, Colors.COLOR_RED + \
+                                "Value Y2 out of range! Y2 must be in range: 0 - " + str(Map.end - 1) + "\n")
                 return False, 0, 0
     except ValueError:
-        Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Bad number of arguments! Provide exactly four arguments!\n")
+        Utility.SendMsg(player, Colors.COLOR_RED + "Bad number of arguments! Provide exactly four arguments!\n")
         return False, 0, 0, 0, 0
 
 def MoveUnit(player, command):        
     succes, y1, x1, y2, x2, = ParseCommandFour(player, command)
     if succes:
-        localMapStruct = localMaps[player.localMapY][player.localMapX]
-        if isinstance(localMapStruct.fields[y2][x2], Buildings.Empty):
-            if isinstance(localMapStruct.fields[y1][x1], Units.Unit):
-                localMapStruct.fields[y2][x2] = localMapStruct.fields[y1][x1]
-                localMapStruct.fields[y1][x1] = Buildings.Empty()
-                Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Unit succesfully moved!\n")
+        pos2 = Pos(player.wy, player.wx, y2, x2)
+        field2 = Map.Get(pos2)
+        pos1 = Pos(player.wy, player.wx, y1, x1)
+        field1 = Map.Get(pos1)
+        if isinstance(field2, Buildings.Empty):
+            if isinstance(field1, Units.Unit):
+                Map.Swap(pos1, pos2)
+                Utility.SendMsg(player, Colors.COLOR_GREEN + "Unit succesfully moved!\n")
             else:
-                Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Only units can be moved!\n") 
+                Utility.SendMsg(player, Colors.COLOR_RED + "Only units can be moved!\n") 
         else:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Destination place is not empty!\n")     
+            Utility.SendMsg(player, Colors.COLOR_RED + "Destination place is not empty!\n")     

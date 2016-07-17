@@ -1,92 +1,99 @@
-from LocalMapStruct import localMaps
-import Control
+from Colors import Colors
+from Pos import Pos
 import Utility
 import Log
-import Config
+import Geo
+import Map
 
 class BattleMap():
        
-    def __init__(self, player, army, y, x):
+    def __init__(self, player, army, wy, wx):
         Log.Save("Init BattleMap!\n")
         self.player = player
         self.army = army
-        self.y = y
-        self.x = x
+        self.cwy = wy
+        self.cwx = wx
         
-        self.offset = 5
-        if self.army['OnWest']:
-            self.offset = 10
+        self.offset = Map.firstQ
+        if self.army[Geo.NORTH]:
+            self.nwy = wy - 1
+            self.nwx = wx
+        if self.army[Geo.SOUTH]:
+            self.swy = wy + 1
+            self.swx = wx
+        if self.army[Geo.EAST]:
+            self.ewy = wy
+            self.ewx = wx + 1
+        if self.army[Geo.WEST]:
+            self.wwy = wy
+            self.wwx = wx - 1
+            self.offset = Map.half
        
     def ShowBattleMap(self):
-        if self.army['OnNorth']:
+        if self.army[Geo.NORTH]:
             self.ShowMapSouth()
         self.ShowCentralMap()
-        if self.army['OnSouth']:
+        if self.army[Geo.SOUTH]:
             self.ShowMapNorth()
  
     def ShowCentralMap(self):     
-        localMapStructCentral = localMaps[self.player.localMapY][self.player.localMapX]
-        localMapStructWest = localMaps[self.player.localMapY][self.player.localMapX-1]
-        localMapStructEast = localMaps[self.player.localMapY][self.player.localMapX+1]
-        mapMsg = Control.CTRL_COLOR_WHITE
+        mapMsg = Colors.COLOR_WHITE
         # NORTH
-        for y in range(0, Config.localMapSize/4):
-            for x in range(0, Config.localMapSize/4):
+        for y in range(Map.firstQ):
+            for x in range(Map.firstQ):
                 mapMsg += " "
-            if self.army['OnWest']:
-                for x in range(3*Config.localMapSize/4, Config.localMapSize):
+            if self.army[Geo.WEST]:
+                for x in range(Map.thirdQ, Map.end):
                     mapMsg += " "
-            for x in range(Config.localMapSize/4, 3*Config.localMapSize/4):   
-                instance = localMapStructCentral.fields[y][x]
+            for x in range(Map.firstQ, Map.thirdQ):   
+                instance = Map.Get(Pos(self.cwy, self.cwx, y, x))
                 mapMsg += instance.color + instance.field
             mapMsg += "\n"
         # CENTRAL
-        for y in range(Config.localMapSize/4, 3*Config.localMapSize/4):
-            if self.army['OnWest']:
-                for x in range(3*Config.localMapSize/4, Config.localMapSize):   
-                    instance = localMapStructWest.fields[y][x]
+        for y in range(Map.firstQ, Map.thirdQ):
+            if self.army[Geo.WEST]:
+                for x in range(Map.thirdQ, Map.end):   
+                    instance = Map.Get(Pos(self.wwy, self.wwx, y, x)) 
                     mapMsg += instance.color + instance.field
-            for x in range(0, Config.localMapSize):   
-                instance = localMapStructCentral.fields[y][x]
+            for x in range(Map.end):   
+                instance = Map.Get(Pos(self.cwy, self.cwx, y, x))
                 mapMsg += instance.color + instance.field
-            if self.army['OnEast']:
-                for x in range(0, Config.localMapSize/4):   
-                    instance = localMapStructEast.fields[y][x]
+            if self.army[Geo.EAST]:
+                for x in range(Map.firstQ):   
+                    instance = Map.Get(Pos(self.wwy, self.wwx, y, x))
                     mapMsg += instance.color + instance.field
             mapMsg += "\n"
         # SOUTH
-        for y in range(3*Config.localMapSize/4, Config.localMapSize):
-            for x in range(0, Config.localMapSize/4):
+        for y in range(Map.thirdQ, Map.end):
+            for x in range(0, Map.firstQ):
                 mapMsg += " "
-            if self.army['OnWest']:
-                for x in range(3*Config.localMapSize/4, Config.localMapSize):
+            if self.army[Geo.WEST]:
+                for x in range(Map.thirdQ, Map.end):
                     mapMsg += " "
-            for x in range(Config.localMapSize/4, 3*Config.localMapSize/4):   
-                instance = localMapStructCentral.fields[y][x]
+            for x in range(Map.firstQ, Map.thirdQ):   
+                instance = Map.Get(Pos(self.cwy, self.cwx, y, x))
                 mapMsg += instance.color + instance.field
             mapMsg += "\n"
         Utility.SendMsg(self.player, mapMsg)
              
     def ShowMapNorth(self):  
-        mapMsg =  Control.CTRL_COLOR_WHITE   
-        localMapStruct = localMaps[self.y+1][self.x]
-        for y in range(0, Config.localMapSize / 4):
+        mapMsg =  Colors.COLOR_WHITE   
+        for y in range(0, Map.firstQ):
             for x in range(0, self.offset):
                 mapMsg += " "
-            for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
-                instance = localMapStruct.fields[y][x]
+            for x in range(Map.firstQ, Map.thirdQ):
+                instance = Map.Get(Pos(self.swy, self.swx, y, x))
                 mapMsg += instance.color + instance.field
             mapMsg += "\n"
         Utility.SendMsg(self.player, mapMsg)
           
     def ShowMapSouth(self):  
-        mapMsg =  Control.CTRL_COLOR_WHITE   
-        localMapStruct = localMaps[self.y-1][self.x]
-        for y in range(3 * Config.localMapSize / 4, Config.localMapSize):
-            for x in range(0, self.offset):
+        mapMsg =  Colors.COLOR_WHITE   
+        for y in range(Map.thirdQ, Map.end):
+            for x in range(self.offset):
                 mapMsg += " "
-            for x in range(Config.localMapSize / 4, 3 * Config.localMapSize / 4):
-                instance = localMapStruct.fields[y][x]
+            for x in range(Map.firstQ, Map.thirdQ):
+                instance = Map.Get(Pos(self.nwy, self.nwx, y, x))
                 mapMsg += instance.color + instance.field
             mapMsg += "\n"
         Utility.SendMsg(self.player, mapMsg)

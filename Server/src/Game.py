@@ -1,45 +1,46 @@
-from Commands import MenuCommands, MainCommands, WorldMapCommands, LocalMapCommands
+from Commands import MenuCommands, MainCommands, LocalMapCommands, WorldMapCommands
+from Colors import Colors
 import Log
 import WorldMap
 import LocalMap
 import State
 import Control
 import Utility 
+import Commands
 
 def InitGame():
     Log.Init()
     WorldMap.LoadMap()
-    WorldMap.InitLocalMaps()
     WorldMap.InitForbiddenPlaces()
 
 def MainMenu(player):
     Log.Save("New player enter main menu!\n")
-    Utility.SendMsg(player, Control.CTRL_MENU)
-    menu =  Control.CTRL_COLOR_AZURE
+    menu =  Colors.COLOR_AZURE
     menu += "Welcome in Battle For Samsung game!\n"
     menu += "choose one of the available options:\n"
     Utility.SendMsg(player, menu)
-    Utility.SendMsg(player, MenuCommands.Get())
+    Utility.SendMsg(player, Control.CTRL_MENU_MAIN)
+    Utility.SendMsg(player, Commands.GetCommands(MenuCommands))
     
     while player.state != State.EXITING:
         reply = Utility.SendMsg(player, Control.CTRL_INPUT)
         Log.Save("Player reply is: " + reply + "\n")
-        if reply == MenuCommands.REGISTER:
+        if reply == MenuCommands._0_0_REGISTER:
             Register(player)
             break
-        elif reply == MenuCommands.LOGIN:
+        elif reply == MenuCommands._1_0_LOGIN:
             Login(player)
             break
-        elif reply == MenuCommands.EXIT:
+        elif reply == MenuCommands._2_0_EXIT:
             Exit(player)
         else:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Undefined option!\n")
+            Utility.SendMsg(player, Colors.COLOR_RED + "Undefined option!\n")
 
 def Register(player):  
     player.username = Utility.SendMsg(player, Control.CTRL_USERNAME)
     
     if Utility.CheckUserName(player.username):
-        errorMsg = Control.CTRL_COLOR_RED
+        errorMsg = Colors.COLOR_RED
         errorMsg +=  "Username "
         errorMsg += player.username
         errorMsg += " already exist!\n"
@@ -47,11 +48,11 @@ def Register(player):
         Utility.SendMsg(player, errorMsg)
         return
     
-    Utility.SendMsg(player, Control.CTRL_COLOR_AZURE + "please enter password:\n") 
+    Utility.SendMsg(player, Colors.COLOR_AZURE + "please enter password:\n") 
     password = Utility.SendMsg(player, Control.CTRL_PASSWORD) 
     
     Utility.CreateAccount(player.username, password)
-    Utility.SendMsg(player, Control.CTRL_COLOR_GREEN +  "Account successfully created!\n")
+    Utility.SendMsg(player, Colors.COLOR_GREEN +  "Account successfully created!\n")
     
     player.loggedIn = True
     player.state = State.WORLD_MAP
@@ -63,7 +64,7 @@ def Login(player):
     player.username = Utility.SendMsg(player, Control.CTRL_USERNAME)
     
     if not Utility.CheckUserName(player.username):
-        errorMsg = Control.CTRL_COLOR_RED
+        errorMsg = Colors.COLOR_RED
         errorMsg +=  "Username "
         errorMsg += player.username
         errorMsg += " doesn't exist!\n"
@@ -71,14 +72,14 @@ def Login(player):
         Utility.SendMsg(player, errorMsg)
         return
 
-    Utility.SendMsg(player, Control.CTRL_COLOR_AZURE + "please enter password:\n") 
+    Utility.SendMsg(player, Colors.COLOR_AZURE + "please enter password:\n") 
     password = Utility.SendMsg(player, Control.CTRL_PASSWORD)
 
     while not Utility.CheckPassword(player.username, password):
-        Utility.SendMsg(player, Control.CTRL_COLOR_RED + "Wrong password!\nPlease enter correct password:\n")
+        Utility.SendMsg(player, Colors.COLOR_RED + "Wrong password!\nPlease enter correct password:\n")
         password = Utility.SendMsg(player, Control.CTRL_PASSWORD)
 
-    Utility.SendMsg(player, Control.CTRL_COLOR_GREEN + "Successfully logged in!\n")
+    Utility.SendMsg(player, Colors.COLOR_GREEN + "Successfully logged in!\n")
 
     player.loggedIn = True
     player.state = State.WORLD_MAP
@@ -95,29 +96,29 @@ def Exit(player):
 def WorldMapMenu(player):
     Log.Save(player.username + " enters World Map\n")
     
-    worldMapMenu =  Control.CTRL_COLOR_AZURE
+    worldMapMenu =  Colors.COLOR_AZURE
     worldMapMenu +=  "Welcome on World Map!\n"
     worldMapMenu += "choose one of the available options:\n"
     Utility.SendMsg(player, worldMapMenu)
-    Utility.SendMsg(player, WorldMapCommands.Get())
-    Utility.SendMsg(player, MainCommands.Get())
+    Utility.SendMsg(player, Commands.GetCommands(WorldMapCommands))
+    Utility.SendMsg(player, Commands.GetCommands(MainCommands))
     
     while player.state == State.WORLD_MAP:
-        Utility.SendMsg(player, Control.CTRL_WORLD_MAP)
+        Utility.SendMsg(player, Control.CTRL_MENU_WORLD_MAP)
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         WorldMap.ExecuteCommand(player, command)   
 
 def LocalMapMenu(player):
     Log.Save(player.username + " enters Local Map\n")
     
-    localMapMenu =  Control.CTRL_COLOR_AZURE
+    localMapMenu =  Colors.COLOR_AZURE
     localMapMenu +=  "Welcome on Local Map!\n"
     localMapMenu += "choose one of the available options:\n"
     Utility.SendMsg(player, localMapMenu)
-    Utility.SendMsg(player, LocalMapCommands.Get())
-    Utility.SendMsg(player, MainCommands.Get())
+    Utility.SendMsg(player, Commands.GetCommands(LocalMapCommands))
+    Utility.SendMsg(player, Commands.GetCommands(MainCommands))
     
     while player.state == State.LOCAL_MAP:
-        Utility.SendMsg(player, Control.CTRL_LOCAL_MAP)
+        Utility.SendMsg(player, Control.CTRL_MENU_LOCAL_MAP)
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         LocalMap.ExecuteCommand(player, command)  

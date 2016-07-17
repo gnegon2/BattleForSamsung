@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import Control
+from Colors import Colors
 
 class Statistics(OrderedDict):  
     def __init__(self, *arg, **kw):
@@ -16,28 +16,28 @@ class Statistics(OrderedDict):
     
 class HitPoints():
     name = "hit points"
-    color = Control.CTRL_COLOR_GREEN
+    color = Colors.COLOR_GREEN
     
 class Defence():
     name = "defence"
-    color = Control.CTRL_COLOR_STEEL
+    color = Colors.COLOR_STEEL
     
 class Attack():
     name = "attack"
-    color = Control.CTRL_COLOR_RED
+    color = Colors.COLOR_RED
     
 class MinDamage():
     name = "min damage"
-    color = Control.CTRL_COLOR_BROWN
+    color = Colors.COLOR_BROWN
     
 class MaxDamage():
     name = "max damage"
-    color = Control.CTRL_COLOR_VIOLET
+    color = Colors.COLOR_VIOLET
     
 class Range():
     name = "range"
-    color = Control.CTRL_COLOR_GOLD
+    color = Colors.COLOR_GOLD
     
 class Speed():
     name = "speed"
-    color = Control.CTRL_COLOR_AZURE
+    color = Colors.COLOR_AZURE

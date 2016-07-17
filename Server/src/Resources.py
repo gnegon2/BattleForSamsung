@@ -1,5 +1,5 @@
 from collections import OrderedDict
-import Control
+from Colors import Colors
     
 class Resources(OrderedDict):  
     def __init__(self, *arg, **kw):
@@ -13,16 +13,16 @@ class Resources(OrderedDict):
     
 class Gold():
     name = "gold"
-    color = Control.CTRL_COLOR_GOLD
+    color = Colors.COLOR_GOLD
     
 class Wood():
     name = "wood"
-    color = Control.CTRL_COLOR_BROWN
+    color = Colors.COLOR_BROWN
     
 class Stone():
     name = "stone"
-    color = Control.CTRL_COLOR_STEEL
+    color = Colors.COLOR_STEEL
     
 class Crystals():
     name = "crystals"
-    color = Control.CTRL_COLOR_VIOLET
+    color = Colors.COLOR_VIOLET

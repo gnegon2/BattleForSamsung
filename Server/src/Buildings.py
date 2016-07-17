@@ -1,100 +1,104 @@
 from Resources import Resources
 from Commands import BuildingCommands
-from LocalMapStruct import localMaps
-import Utility
-import Control
+from Colors import Colors
 from Statistics import Statistics
+import Utility
+import Map
 
 def CommandToBuilding(command):
-    if command == BuildingCommands.BANK:
-        return Bank
-    elif command == BuildingCommands.HOUSE:
+    if command == BuildingCommands._0_0_HOUSE:
         return House
-    elif command == BuildingCommands.SAW_MILL:
+    elif command == BuildingCommands._1_0_BANK:
+        return Bank
+    elif command == BuildingCommands._2_0_SAW_MILL:
         return SawMill
-    elif command == BuildingCommands.LIBRARY:
-        return Library
-    elif command == BuildingCommands.MINE:
+    elif command == BuildingCommands._3_0_MINE:
         return Mine
-    elif command == BuildingCommands.CRYSTAL_MINE:
+    elif command == BuildingCommands._4_0_CRYSTAL_MINE:
         return CrystalMine
-    elif command == BuildingCommands.WALL:
+    elif command == BuildingCommands._5_0_WALL:
         return Wall
-    elif command == BuildingCommands.TOWER:
+    elif command == BuildingCommands._6_0_TOWER:
         return Tower
+    elif command == BuildingCommands._7_0_LIBRARY:
+        return Library
     else:
         return Empty
     
-def Build(player, building):
+def Pay(player, building):
     for resType, resAmount in building.cost.iteritems():
         resDiff = resAmount - player.resources[resType]
         if resDiff > 0:
-            Utility.SendMsg(player, Control.CTRL_COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n" )
+            Utility.SendMsg(player, Colors.COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n" )
             return False
     for resType, resAmount in building.cost.iteritems():
         player.resources[resType] -= resAmount
     return True
 
 def ShowInfo(player, building):
-    Utility.SendMsg(player, Control.CTRL_COLOR_AZURE + building.__name__ + ": \n")
+    Utility.SendMsg(player, Colors.COLOR_AZURE + building.__name__ + ": \n")
     Utility.SendMsg(player, building.ExtraInfo())
-    Utility.SendMsg(player, Control.CTRL_COLOR_ORANGE + "Cost: \n")
+    Utility.SendMsg(player, Colors.COLOR_ORANGE + "Cost: \n")
     for iType, iAmount in building.cost.iteritems():
         if iAmount > 0:
             Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")
     
     if hasattr(building, 'production'):
-        Utility.SendMsg(player, Control.CTRL_COLOR_ORANGE + "Production: \n")
+        Utility.SendMsg(player, Colors.COLOR_ORANGE + "Production: \n")
         for iType, iAmount in building.production.iteritems():
             if iAmount > 0:
                 Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")
     
-    Utility.SendMsg(player, Control.CTRL_COLOR_ORANGE + "Statistics: \n")
+    Utility.SendMsg(player, Colors.COLOR_ORANGE + "Statistics: \n")
     for iType, iAmount in building.statistics.iteritems():
         if iAmount > 0:
             Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")    
     
 def GetProduction(player, building):
     if hasattr(building, 'production'):
-        Utility.SendMsg(player, Control.CTRL_COLOR_AZURE + building.__class__.__name__ + " produce: \n")
+        Utility.SendMsg(player, Colors.COLOR_AZURE + building.__class__.__name__ + " produce: \n")
         for iType, iAmount in building.production.iteritems():
             if iAmount > 0:
                 Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")
                 player.resources[iType] += iAmount
 
 class Building(object):
-    
     def __new__(typ, *args, **kwargs):
         obj = object.__new__(typ, *args, **kwargs)
         obj.owner = args[0]
         return obj
 
 class Empty():
+    field = "0"
+    color = Colors.COLOR_BROWN
+    
     def __init__(self):
-        self.field = "0"
-        self.color = Control.CTRL_COLOR_BROWN
+        self.field = self.__class__.field
+        self.color = self.__class__.color
         
 class Forbidden():
     def __init__(self):
         self.field = "X"
-        self.color = Control.CTRL_COLOR_POPPY
+        self.color = Colors.COLOR_POPPY
 
 class Fortress(Building):
     field = "F"
-    color = Control.CTRL_COLOR_POPPY
+    color = Colors.COLOR_POPPY
         
     cost = Resources()
     cost.Init(200, 5, 5, 1)
     
     production = Resources()
-    production.Init(20, 1, 1)
+    production.Init(80, 4, 4)
     
     statistics = Statistics()
-    statistics.Init(1000, 100, 10, 5, 10, 1)
+    statistics.Init(1000, 10, 10, 5, 10, 1)
     
     army_production = 1
     
     def __init__(self, player):
+        self.level = 1
+        
         self.field = self.__class__.field
         self.color = self.__class__.color
         self.statistics = self.__class__.statistics
@@ -110,39 +114,14 @@ class Fortress(Building):
     
     @staticmethod
     def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
+        extraInfoMsg = Colors.COLOR_GREEN
         extraInfoMsg += "Fortress is the main building on the map.\n"
         extraInfoMsg += "It provides resources and army production.\n"
         return extraInfoMsg
-    
-class Bank(Building):
-    field = "B" 
-    color = Control.CTRL_COLOR_GOLD
-    
-    cost = Resources()
-    cost.Init(40, 5, 5)
-    
-    production = Resources()
-    production.Init(60)
-    
-    statistics = Statistics()
-    statistics.Init(100, 20)
-        
-    def __init__(self, player):
-        self.field = self.__class__.field
-        self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
-        self.production = self.__class__.production
-    
-    @staticmethod
-    def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
-        extraInfoMsg += "Each bank provide you a lot of money.\n"
-        return extraInfoMsg
-    
+
 class House(Building):
     field = "H"
-    color = Control.CTRL_COLOR_GREEN
+    color = Colors.COLOR_GREEN
     
     cost = Resources()
     cost.Init(50, 4, 2)
@@ -167,13 +146,38 @@ class House(Building):
     
     @staticmethod
     def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
+        extraInfoMsg = Colors.COLOR_GREEN
         extraInfoMsg += "Each house provide you to recruit more army.\n"
+        return extraInfoMsg
+
+class Bank(Building):
+    field = "B" 
+    color = Colors.COLOR_GOLD
+    
+    cost = Resources()
+    cost.Init(40, 5, 5)
+    
+    production = Resources()
+    production.Init(60)
+    
+    statistics = Statistics()
+    statistics.Init(100, 20)
+        
+    def __init__(self, player):
+        self.field = self.__class__.field
+        self.color = self.__class__.color
+        self.statistics = self.__class__.statistics
+        self.production = self.__class__.production
+    
+    @staticmethod
+    def ExtraInfo():
+        extraInfoMsg = Colors.COLOR_GREEN
+        extraInfoMsg += "Each bank provide you a lot of money.\n"
         return extraInfoMsg
 
 class SawMill(Building):
     field = "S"
-    color = Control.CTRL_COLOR_WOOD
+    color = Colors.COLOR_WOOD
     
     cost = Resources()
     cost.Init(40, 5)
@@ -192,41 +196,13 @@ class SawMill(Building):
     
     @staticmethod
     def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
+        extraInfoMsg = Colors.COLOR_GREEN
         extraInfoMsg += "Saw mill provide you a lot of wood.\n"
-        return extraInfoMsg
-    
-class Library(Building):
-    field = "L"
-    color = Control.CTRL_COLOR_AZURE
-    
-    cost = Resources()
-    cost.Init(150, 4, 4, 1)
-    
-    statistics = Statistics()
-    statistics.Init(50, 10)  
-        
-    def __init__(self, player):
-        self.field = self.__class__.field
-        self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
-        
-        localMaps[self.owner.localMapY][self.owner.localMapX].librariesCount += 1
-        print "librariesCount=" + str(localMaps[self.owner.localMapY][self.owner.localMapX].librariesCount)
-        
-    def __del__(self):
-        localMaps[self.owner.localMapY][self.owner.localMapX].librariesCount -= 1  
-        print "librariesCount=" + str(localMaps[self.owner.localMapY][self.owner.localMapX].librariesCount)
-    
-    @staticmethod
-    def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
-        extraInfoMsg += "Each library give you access to a new unit.\n"
         return extraInfoMsg
     
 class Mine(Building):
     field = "M"
-    color = Control.CTRL_COLOR_STEEL
+    color = Colors.COLOR_STEEL
     
     cost = Resources()
     cost.Init(60, 4)
@@ -245,13 +221,13 @@ class Mine(Building):
     
     @staticmethod
     def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
+        extraInfoMsg = Colors.COLOR_GREEN
         extraInfoMsg += "Mine provide you a lot of stone.\n"
         return extraInfoMsg
     
 class CrystalMine(Building):
     field = "C"
-    color = Control.CTRL_COLOR_VIOLET
+    color = Colors.COLOR_VIOLET
     
     cost = Resources()
     cost.Init(200, 4, 4)
@@ -270,13 +246,13 @@ class CrystalMine(Building):
     
     @staticmethod
     def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
+        extraInfoMsg = Colors.COLOR_GREEN
         extraInfoMsg += "Crystal mine provide you a crystals.\n"
         return extraInfoMsg
     
 class Wall(Building):
     field = "W"
-    color = Control.CTRL_COLOR_GRANAT
+    color = Colors.COLOR_GRANAT
     
     cost = Resources()
     cost.Init(40, 1, 1)
@@ -291,13 +267,13 @@ class Wall(Building):
     
     @staticmethod
     def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
+        extraInfoMsg = Colors.COLOR_GREEN
         extraInfoMsg += "Wall defends your fortress.\n"
         return extraInfoMsg
     
 class Tower(Building):
     field = "T"
-    color = Control.CTRL_COLOR_BLOOD
+    color = Colors.COLOR_BLOOD
     
     cost = Resources()
     cost.Init(120, 3, 3)
@@ -312,6 +288,36 @@ class Tower(Building):
     
     @staticmethod
     def ExtraInfo():
-        extraInfoMsg = Control.CTRL_COLOR_GREEN
+        extraInfoMsg = Colors.COLOR_GREEN
         extraInfoMsg += "Tower attack nearby enemy and defends your fortress.\n"
+        return extraInfoMsg
+    
+class Library(Building):
+    field = "L"
+    color = Colors.COLOR_AZURE
+    
+    cost = Resources()
+    cost.Init(150, 4, 4, 1)
+    
+    statistics = Statistics()
+    statistics.Init(50, 10)  
+        
+    def __init__(self, player):
+        self.field = self.__class__.field
+        self.color = self.__class__.color
+        self.statistics = self.__class__.statistics
+        
+        fortress = Map.GetFort(self.owner.wy, self.owner.wx)
+        fortress.level += 1
+        print "librariesCount=" + str(fortress.level)
+        
+    def __del__(self):
+        fortress = Map.GetFort(self.owner.wy, self.owner.wx)
+        fortress.level -= 1
+        print "librariesCount=" + str(fortress.level)
+    
+    @staticmethod
+    def ExtraInfo():
+        extraInfoMsg = Colors.COLOR_GREEN
+        extraInfoMsg += "Each library give you access to a new unit.\n"
         return extraInfoMsg

@@ -1,6 +1,6 @@
 from Resources import Resources
 from UserInfo import UserInfo
-import Control
+from Colors import Colors
 import Utility
 import Data
 import State
@@ -31,15 +31,15 @@ class Player():
                 self.resources = resources_arg
     
     def ShowResources(self):        
-        Utility.SendMsg(self, Control.CTRL_COLOR_GREEN + "Resources:\n")
+        Utility.SendMsg(self, Colors.COLOR_GREEN + "Resources:\n")
         for resType, resAmount in self.resources.iteritems():
             Utility.SendMsg(self, resType.color + resType.name + " = " + str(resAmount) + "\n")
         
-        Utility.SendMsg(self, Control.CTRL_COLOR_GREEN + "UserInfo:\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_GOLD + "buildingsBuildToday: " + str(self.info.buildingsBuildToday) + "\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_BROWN + "unitsRecruitedToday: " + str(self.info.unitsRecruitedToday) + "\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_STEEL + "maxNumberOfUnits: " + str(self.info.maxNumberOfUnits) + "\n")
-        Utility.SendMsg(self, Control.CTRL_COLOR_VIOLET + "numberOfUnits: " + str(self.info.numberOfUnits) + "\n")   
+        Utility.SendMsg(self, Colors.COLOR_GREEN + "UserInfo:\n")
+        Utility.SendMsg(self, Colors.COLOR_GOLD + "buildingsBuildToday: " + str(self.info.buildingsBuildToday) + "\n")
+        Utility.SendMsg(self, Colors.COLOR_BROWN + "unitsRecruitedToday: " + str(self.info.unitsRecruitedToday) + "\n")
+        Utility.SendMsg(self, Colors.COLOR_STEEL + "maxNumberOfUnits: " + str(self.info.maxNumberOfUnits) + "\n")
+        Utility.SendMsg(self, Colors.COLOR_VIOLET + "numberOfUnits: " + str(self.info.numberOfUnits) + "\n")   
         
         
         

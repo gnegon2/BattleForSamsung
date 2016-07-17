@@ -1,9 +1,3 @@
-global mainMenu
-mainMenu = False
-
-global dataPath 
-dataPath = "data.db"
-
 global logPath
 logPath = "log.txt"
 
@@ -14,10 +8,7 @@ global debug
 debug = True
 
 global port
-port = 50003
-
-global worldMapSize
-worldMapSize = 10
+port = 50000
 
 global localMapSize
 localMapSize = 20
@@ -27,3 +18,6 @@ maxBuildingsPerDay = 4
 
 global maxUnitsPerDay
 maxUnitsPerDay = 4
+
+global randomColors
+randomColors = True

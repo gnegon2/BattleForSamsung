@@ -5,28 +5,19 @@ from prompt_toolkit.shortcuts import print_tokens
 from prompt_toolkit.styles import style_from_dict
 from prompt_toolkit.token import Token
 from prompt_toolkit.history import InMemoryHistory
-from Commands import MenuCommands
-from Commands import MainCommands
-from Commands import WorldMapCommands
-from Commands import LocalMapCommands
-from Commands import BuildingCommands
-from Commands import UnitsCommands
-from Commands import ActionCommands
-from Commands import BattleCommands
+import Commands
 import socket
-import thread
 import sys
 import getpass
 import Config
 import Control
-import State
 
 class Console():
     history = InMemoryHistory()  
     commands = []
     commands_completer = ()
     level = 0
-    
+       
     Colors = \
     {
         Token.WHITE: '#FFFFFF',
@@ -48,99 +39,45 @@ class Console():
     
     @staticmethod
     def update_level(command):
-        Console.level = int(command[15:])
+        Console.level = int(command[len(Control.CTRL_MENU_UNITS):])
         
     @staticmethod
-    def update_complete():
+    def update_complete(data):
         Console.clear_commands()
-        if Client.state == State.MENU:
-            Console.menu_complete()
-        elif Client.state == State.BATTLE_MENU:
-            Console.battle_menu_complete()
+        commands = Commands.ControlToCommands(data)
+        if commands is not Commands.UnitsCommands:
+            Console.add_commands(commands)
         else:
-            if Client.state == State.WORLD_MAP:
-                Console.world_map_complete()  
-            elif Client.state == State.LOCAL_MAP:
-                Console.local_map_complete() 
-            elif Client.state == State.BUILDING_MENU:
-                Console.building_menu_complete() 
-            elif Client.state == State.BUILDING_ACTION_MENU:
-                Console.action_menu_complete()
-            elif Client.state == State.UNITS_MENU:
-                Console.units_menu_complete()
-            elif Client.state == State.UNITS_ACTION_MENU:
-                Console.action_menu_complete()
-            Console.main_complete()
+            Console.update_level(data)
+            Console.add__units_commands()
+        if commands is not Commands.MenuCommands:
+            Console.add_commands(Commands.MainCommands)
         Console.apply_commands()
-    
+            
     @staticmethod
     def clear_commands():
         del Console.commands[:]
+        
+    @staticmethod
+    def add_commands(commands):
+        for key, value in sorted(vars(commands).iteritems()):
+            if not (key.startswith('__')) and isinstance(value, basestring):
+                Console.commands.append(value)
         
     @staticmethod
     def apply_commands():
         Console.commands_completer = WordCompleter(Console.commands, ignore_case=False)
     
     @staticmethod
-    def menu_complete(): 
-        for key, value in vars(MenuCommands).iteritems():
+    def add__units_commands():
+        for key, value in sorted(vars(Commands.UnitsCommands).iteritems()):
             if not (key.startswith('__')) and isinstance(value, basestring):
-                Console.commands.append(value)
-        
-    @staticmethod
-    def main_complete():         
-        for key, value in vars(MainCommands).iteritems():
-            if not (key.startswith('__')) and isinstance(value, basestring):
-                Console.commands.append(value)
-
-    @staticmethod
-    def world_map_complete():
-        for key, value in vars(WorldMapCommands).iteritems():
-            if not (key.startswith('__')) and isinstance(value, basestring):
-                Console.commands.append(value)
-        
-    @staticmethod
-    def local_map_complete():
-        for key, value in vars(LocalMapCommands).iteritems():
-            if not (key.startswith('__')) and isinstance(value, basestring):
-                Console.commands.append(value)
-    
-    @staticmethod
-    def building_menu_complete():
-        for key, value in vars(BuildingCommands).iteritems():
-            if not (key.startswith('__')) and isinstance(value, basestring):
-                Console.commands.append(value)
-    
-    @staticmethod
-    def units_menu_complete():
-        Console.commands.append(UnitsCommands.MOVE_UNIT)
-        Console.commands.append(UnitsCommands.PEASANT)
-        if Console.level > 0:
-            Console.commands.append(UnitsCommands.ARCHER)
-        if Console.level > 1:
-            Console.commands.append(UnitsCommands.SWORDMAN)
-        if Console.level > 2:
-            Console.commands.append(UnitsCommands.PIKEMAN)
-        if Console.level > 3:
-            Console.commands.append(UnitsCommands.CROSSBOWMAN)
-        if Console.level > 4:
-            Console.commands.append(UnitsCommands.HORSEMAN)
-        if Console.level > 5:
-            Console.commands.append(UnitsCommands.CATAPULT)
-        if Console.level > 6:
-            Console.commands.append(UnitsCommands.CANNON)
-            
-    @staticmethod
-    def action_menu_complete():
-        for key, value in vars(ActionCommands).iteritems():
-            if not (key.startswith('__')) and isinstance(value, basestring):
-                Console.commands.append(value) 
-                
-    @staticmethod
-    def battle_menu_complete(): 
-        for key, value in vars(BattleCommands).iteritems():
-            if not (key.startswith('__')) and isinstance(value, basestring):
-                Console.commands.append(value)
+                if value != Commands.UnitsCommands._0_4_MOVE_UNIT:
+                    level = int(key[1])
+                    if level <= Console.level:
+                        Console.commands.append(value)
+                else:
+                    Console.commands.append(value)
                 
     @staticmethod
     def find_color(text):
@@ -172,22 +109,19 @@ class Console():
                 break       
         print_tokens(tokens, style=my_style)
 
-class Client:
-    'Client class'
-    isRunning = True 
-    state = State.MENU  
+class Client: 
     ACK = "ACK"   
     maxMsgRcv = 32000
             
     @staticmethod 
     def Read(sock):
         try:
-            while Client.isRunning:
+            while True:
                 data = sock.recv(Client.maxMsgRcv)
                 if data.find(Control.CTRL_EXIT) != -1:
                     print "Closing the game!"
                     sock.sendall(Client.ACK)
-                    Client.isRunning = False
+                    break
                 elif data.find(Control.CTRL_USERNAME) != -1:
                     username = getpass.getuser()
                     sock.sendall(username)
@@ -201,57 +135,18 @@ class Client:
                     Console.history.append(msg)
                     sock.sendall(msg)
                 elif data.find(Control.CTRL_MENU) != -1:
-                    Client.state = State.MENU
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_WORLD_MAP) != -1:
-                    Client.state = State.WORLD_MAP
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_SCOUTING_MODE) != -1:
-                    Client.state = State.SCOUTING_MODE
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_LOCAL_MAP) != -1:
-                    Client.state = State.LOCAL_MAP
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_BUILDING_MENU) != -1:
-                    Client.state = State.BUILDING_MENU
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_BUILDING_ACTION_MENU) != -1:
-                    Client.state = State.BUILDING_ACTION_MENU
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_UNITS_MENU) != -1:
-                    Client.state = State.UNITS_MENU
-                    Console.update_level(data)
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_UNITS_ACTION_MENU) != -1:
-                    Client.state = State.UNITS_ACTION_MENU
-                    Console.update_complete()
-                    sock.sendall(Client.ACK)
-                elif data.find(Control.CTRL_BATTLE_MENU) != -1:
-                    Client.state = State.BATTLE_MENU
-                    Console.update_complete()
+                    Console.update_complete(data)
                     sock.sendall(Client.ACK)
                 elif data:
-                    if data.find(Control.CTRL_COLOR) != -1:
-                        Console.print_colored(data)
-                    else:
-                        sys.stdout.write(data)
+                    Console.print_colored(data)
                     sock.sendall(Client.ACK)
                 else:
                     print "Server ends connection! Closing the game."
-                    Client.isRunning = False 
+                    break
         except socket.error:
-            print "Server ends connection! Closing the game."
-            Client.isRunning = False
+            print "Socket error! Closing the game."
         except KeyboardInterrupt:
             print "User interrupt! Closing the game."
-            Client.isRunning = False
                 
     @staticmethod
     def Start(): 
@@ -261,11 +156,9 @@ class Client:
         print 'Connecting to %s port %s' % server_address
         try:
             sock.connect(server_address)  
-            thread.start_new_thread(Client.Read, (sock,) )
-            while Client.isRunning:
-                pass
-            sock.close()
-        except:
-            sock.close()
+            Client.Read(sock)
+        except Exception as e:
+            print str(e)
+        sock.close()
 
 Client.Start()
