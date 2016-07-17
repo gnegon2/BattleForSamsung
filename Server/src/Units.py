@@ -2,6 +2,7 @@ from Commands import UnitsCommands
 from Colors import Colors
 from Resources import Resources
 from Statistics import Statistics
+from copy import copy
 import Utility
 
 def CommandToUnit(command):
@@ -28,7 +29,7 @@ def Buy(player, unit):
     for resType, resAmount in unit.cost.iteritems():
         resDiff = resAmount - player.resources[resType]
         if resDiff > 0:
-            Utility.SendMsg(player, Colors.COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n" )
+            Utility.SendMsg(player, Colors.COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n")
             return False
     for resType, resAmount in unit.cost.iteritems():
         player.resources[resType] -= resAmount
@@ -73,7 +74,7 @@ class Peasant(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_GREEN
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         
     @staticmethod
     def ExtraInfo():
@@ -89,7 +90,7 @@ class Archer(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_GOLD
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
     
     @staticmethod
     def ExtraInfo():
@@ -105,7 +106,7 @@ class Swordman(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_STEEL
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
     
     @staticmethod
     def ExtraInfo():
@@ -121,7 +122,7 @@ class Pikeman(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_GRANAT
-        self.statistics = self.__class__.statistics     
+        self.statistics = copy(self.__class__.statistics)     
     
     @staticmethod
     def ExtraInfo():
@@ -137,7 +138,7 @@ class Crossbowman(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_ORANGE
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         
     @staticmethod
     def ExtraInfo():
@@ -153,7 +154,7 @@ class Horseman(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_WOOD
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
     
     @staticmethod
     def ExtraInfo():
@@ -169,7 +170,7 @@ class Catapult(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_BLOOD
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         
     @staticmethod
     def ExtraInfo():
@@ -185,7 +186,7 @@ class Cannon(Unit):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = Colors.COLOR_AZURE
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         
     @staticmethod
     def ExtraInfo():

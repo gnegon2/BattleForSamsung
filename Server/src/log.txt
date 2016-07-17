@@ -23,6 +23,6 @@ Init battle on field: 1 1!
 Start battle on field: 1 1!
 Init BattleMap!
 mateusz destroy enemy fortress!
-Client end connection!
 mateusz exits the game!
+test exits the game!
 Error. Stopping Server.

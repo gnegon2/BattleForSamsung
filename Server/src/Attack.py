@@ -29,8 +29,12 @@ def AttackFortress(player, wy, wx):
             battle = Battle(player, army, wy, wx)
             if battle.Start():
                 Log.Save(player.username + " destroy enemy fortress!\n")
+                Utility.SendMsg(player, Colors.COLOR_GREEN + "Victory!\nReturning to World Map!\n")
                 fort = Map.GetFort(wy, wx)
                 fort.owner = player
+            else:
+                Log.Save(player.username + " losses the battle!\n")
+                Utility.SendMsg(player, Colors.COLOR_RED + "Lose!\nReturning to World Map!\n")
         else:
             Utility.SendMsg(player, Colors.COLOR_RED + "You have no army near attacking fortress!\n")
     else:

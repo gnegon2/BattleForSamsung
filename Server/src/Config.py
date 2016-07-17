@@ -8,7 +8,7 @@ global debug
 debug = True
 
 global port
-port = 50000
+port = 50001
 
 global localMapSize
 localMapSize = 20

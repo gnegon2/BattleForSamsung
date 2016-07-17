@@ -19,9 +19,9 @@ def Init(player):
         # Units
         
         # North
-        Map.Set(player, Units.Peasant, Pos(0, 1, 19, 10))
+        Map.Set(player, Units.Peasant, Pos(0, 1, 17, 10))
         Map.Set(player, Units.Crossbowman, Pos(0, 1, 18, 13))
-        Map.Set(player, Units.Horseman, Pos(0, 1, 17, 6))
+        #Map.Set(player, Units.Horseman, Pos(0, 1, 17, 10))
         
         #Map.Set(2, 1,  0,  9, Units.Peasant(player))
         #Map.Set(1, 0,  9, 17, Units.Peasant(player))

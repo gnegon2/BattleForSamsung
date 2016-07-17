@@ -47,154 +47,291 @@ class Battle():
         Utility.SendMsg(self.attacker, Control.CTRL_MENU_BATTLE)
         command = Utility.SendMsg(self.attacker, Control.CTRL_INPUT)
         
-        self.AttackerInit()
+        self.InitBattle()
         while True:
             if command == BattleCommands._1_0_MAKE_MOVE:
                 battleMap.ShowBattleMap()
                 command = Utility.SendMsg(self.attacker, Control.CTRL_INPUT)
+                self.log = True
+            else:
+                self.log = False
             
-            self.AttackerPrepare()
-            self.AttackerAttack()
+            self.PrepareBattle()
+            if self.Attack():
+                return True
             while True:
                 if not self.AttackerMove():
                     break
-            
-            if self.AttackerAttack():
+            if self.Attack():
                 return True
+            
+            if not self.CheckUnits():
+                return False
      
-    def AttackerInit(self):
-        print "AttackerInit\n"
-        if self.army[Geo.NORTH]:
-            self.AttackerNorthInit() 
+    def InitEntity(self, wy, wx, y, x, geo):
+        entity = Map.Get(Pos(wy, wx, y, x))
+        if isinstance(entity, Units.Unit) or isinstance(entity, Buildings.Building):
+            entity.army = geo
                       
-    def AttackerNorthInit(self):
-        print "AttackerNorthInit\n"
-        for x in range(Map.firstQ, Map.thirdQ):
-            for y in range(Map.thirdQ, Map.end):
-                instance = Map.Get(Pos(self.nwy, self.nwx, y, x))
-                if isinstance(instance, Units.Unit):
-                    instance.army = Geo.NORTH
-                    
-    def AttackerPrepare(self):
-        print "AttackerPrepare\n"
+    def InitBattle(self):
+        print "InitBattle\n"
+        # Attacker
         if self.army[Geo.NORTH]:
-            self.AttackerNorthPrepare()
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.thirdQ, Map.end):
+                    self.InitEntity(self.nwy, self.nwx, y, x, Geo.NORTH)
+        if self.army[Geo.SOUTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.firstQ):
+                    self.InitEntity(self.swy, self.swx, y, x, Geo.SOUTH)
+        if self.army[Geo.EAST]:
+            for x in range(Map.firstQ):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    self.InitEntity(self.ewy, self.ewx, y, x, Geo.EAST)
+        if self.army[Geo.WEST]:
+            for x in range(Map.thirdQ, Map.end):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    self.InitEntity(self.wwy, self.wwx, y, x, Geo.WEST)         
+        # Defender
+        for x in range(Map.end):
+            for y in range(Map.end):
+                self.InitEntity(self.cwy, self.cwx, y, x, Geo.CENTRAL)
     
-    def AttackerNorthPrepare(self):
-        print "AttackerNorthPrepare\n"
-        for x in range(Map.firstQ, Map.thirdQ):
-            for y in range(Map.thirdQ, Map.end + Map.half):
-                instance = Map.Get(Pos(self.nwy, self.nwx, y, x))
-                if isinstance(instance, Units.Unit) and instance.owner == self.attacker and instance.army == Geo.NORTH:
-                    instance.move = instance.statistics[Statistics.Speed]
-                    instance.attacked = False
-     
+    def PrepareEntity(self, wy, wx, y, x):
+        entity = Map.Get(Pos(wy, wx, y, x))
+        if isinstance(entity, Units.Unit) or isinstance(entity, Buildings.Building):
+            if isinstance(entity, Units.Unit):
+                entity.move = entity.statistics[Statistics.Speed]
+            entity.attacked = False
+    
+    def PrepareBattle(self):
+        print "PrepareBattle\n"
+        if self.army[Geo.NORTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.thirdQ, Map.end):
+                    self.PrepareEntity(self.nwy, self.nwx, y, x)
+        if self.army[Geo.SOUTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.firstQ):
+                    self.PrepareEntity(self.swy, self.swx, y, x)
+        if self.army[Geo.EAST]:
+            for x in range(Map.firstQ):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    self.PrepareEntity(self.ewy, self.ewx, y, x)
+        if self.army[Geo.WEST]:
+            for x in range(Map.thirdQ, Map.end):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    self.PrepareEntity(self.wwy, self.wwx, y, x)
+                    
+        # Defender
+        for x in range(Map.end):
+            for y in range(Map.end):
+                self.PrepareEntity(self.cwy, self.cwx, y, x)
+    
+    def MoveUnit(self, wy, wx,y, x):
+        src_pos = Pos(wy, wx, y, x)
+        unit = Map.Get(src_pos)
+        if isinstance(unit, Units.Unit) and unit.owner == self.attacker and unit.move > 0:
+            if unit.army == Geo.NORTH:
+                ny, nx = y+1, x
+            elif unit.army == Geo.SOUTH:
+                ny, nx = y-1, x
+            elif unit.army == Geo.EAST:
+                ny, nx = y, x-1
+            elif unit.army == Geo.WEST:
+                ny, nx = y, x+1
+            dst_pos = Pos(wy, wx, ny, nx)
+            field = Map.Get(dst_pos)
+            if isinstance(field, Buildings.Empty):
+                Map.Swap(src_pos, dst_pos)
+                unit.move -= 1
+                return True
+        return False
+    
+    def ChangeGeo(self, wy, wx, y, x):
+        src_pos = Pos(wy, wx, y, x)
+        unit = Map.Get(src_pos)
+        if isinstance(unit, Units.Unit) and unit.owner == self.attacker:
+            if x == Map.half or x == Map.half - 1:
+                if y < Map.half:
+                    unit.army = Geo.NORTH
+                else:
+                    unit.army = Geo.SOUTH
+            if y == Map.half or y == Map.half - 1:
+                if x > Map.half:
+                    unit.army = Geo.EAST
+                else:
+                    unit.army = Geo.WEST
+        
     def AttackerMove(self):
         print "AttackerMove\n"
-        moved = False
+        moved = False  
         if self.army[Geo.NORTH]: 
-            if self.AttackerNorthMove():
-                moved = True
-        return moved
-        
-    def AttackerNorthMove(self):
-        print "AttackerNorthMove\n"
-        moved = False       
-        for x in range(Map.firstQ, Map.thirdQ):
-            for y in range(Map.thirdQ, Map.end + Map.half - 1):
-                pos1 = Pos(self.nwy, self.nwx, y, x)
-                instance = Map.Get(pos1)
-                if isinstance(instance, Units.Unit) and instance.owner == self.attacker \
-                    and instance.army == Geo.NORTH and instance.move > 0:
-                    pos2 = Pos(self.nwy, self.nwx, y + 1, x)
-                    destIns = Map.Get(pos2)
-                    if isinstance(destIns, Buildings.Empty):
-                        Map.Swap(pos1, pos2)
-                        instance.move -= 1
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.thirdQ, Map.end):
+                    if self.MoveUnit(self.nwy, self.nwx, y, x):
                         moved = True
-        
-        for x in range(Map.firstQ, Map.thirdQ):
-            pos1 = Pos(self.cwy, self.cwx, Map.half, x)
-            instance = Map.Get(pos1)
-            if isinstance(instance, Units.Unit) and instance.owner == self.attacker \
-                and instance.army == Geo.NORTH and instance.move > 0:
-                    if x < Map.half:
-                        nextField = x + 1
-                        pos2 = Pos(self.cwy, self.cwx, nextField, x)
-                        destIns = Map.Get(pos2)
-                        if isinstance(destIns, Buildings.Empty):
-                            Map.Swap(pos1, pos2)
-                            instance.move -= 1
-                            moved = True
-                    elif x > Map.half:
-                        nextField = x - 1
-                        pos2 = Pos(self.cwy, self.cwx, nextField, x)
-                        destIns = Map.Get(pos2)
-                        if isinstance(destIns, Buildings.Empty):
-                            Map.Swap(pos1, pos2)
-                            instance.move -= 1
-                            moved = True
-
+        if self.army[Geo.SOUTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.firstQ):
+                    if self.MoveUnit(self.swy, self.swx, y, x):
+                        moved = True
+        if self.army[Geo.EAST]:
+            for x in range(Map.firstQ):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    if self.MoveUnit(self.ewy, self.ewx, y, x):
+                        moved = True
+        if self.army[Geo.WEST]:
+            for x in range(Map.thirdQ, Map.end):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    if self.MoveUnit(self.wwy, self.wwx, y, x):
+                        moved = True
+        for x in range(Map.end):
+            for y in range(Map.end):
+                if self.MoveUnit(self.cwy, self.cwx, y, x):
+                    moved = True
+                self.ChangeGeo(self.cwy, self.cwx, y, x)
         return moved
     
-    def AttackerAttack(self):
-        print "AttackerAttack\n"
-        if self.army[Geo.NORTH]:
-            if self.AttackerNorthAttack():
-                return True
-    
-    def AttackerNorthAttack(self):
-        print "AttackerNorthAttack\n"
-        for x in range(Map.firstQ, Map.thirdQ):
-            for y in range(Map.thirdQ, Map.end + Map.half):
-                pos1 = Pos(self.nwy, self.nwx, y, x)
-                instance = Map.Get(pos1)
-                if isinstance(instance, Units.Unit) and instance.owner == self.attacker and \
-                    instance.army == Geo.NORTH and not instance.attacked:
-                    succes, pos_e = self.FindFirstEnemyNorth(pos1, instance.statistics[Statistics.Range])
-                    if succes:
-                        enemyIns = Map.Get(pos_e)
-                        self.TakeDamage(instance, enemyIns)
-                        instance.attacked = True
-                        instance.move = 0
-                        if enemyIns.statistics[Statistics.HitPoints] <= 0:
-                            print "enemy destroyed!"
-                            if isinstance(enemyIns, Buildings.Fortress):
-                                print "victory!"
-                                return True
-                            else:
-                                Map.SetEmpty(pos_e)
-                        print "succes"
+    def EntityAttack(self, wy, wx, y, x):
+        src_pos = Pos(wy, wx, y, x)
+        entity = Map.Get(src_pos)  
+        if (isinstance(entity, Units.Unit) or isinstance(entity, Buildings.Building)) and not entity.attacked:
+            attack_range = entity.statistics[Statistics.Range]
+            if attack_range > 0:
+                succes, dst_pos = self.FindEnemy(src_pos, entity)
+                if succes:
+                    enemy_entity = Map.Get(dst_pos)
+                    self.TakeDamage(entity, enemy_entity)
+                    entity.attacked = True
+                    entity.move = 0
+                    if enemy_entity.statistics[Statistics.HitPoints] <= 0:
+                        print "enemy destroyed!"
+                        if isinstance(enemy_entity, Buildings.Fortress):
+                            print "victory!"
+                            return True
+                        else:
+                            Map.SetEmpty(dst_pos)
+                    print "succes"
         return False
-                        
+    
+    def Attack(self):
+        print "Attack\n"
+        if self.army[Geo.NORTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.thirdQ, Map.end):
+                    if self.EntityAttack(self.nwy, self.nwx, y, x):
+                        return True
+        if self.army[Geo.SOUTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.firstQ):
+                    if self.EntityAttack(self.swy, self.swx, y, x):
+                        return True
+        if self.army[Geo.EAST]:
+            for x in range(Map.firstQ):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    if self.EntityAttack(self.ewy, self.ewx, y, x):
+                        return True
+        if self.army[Geo.WEST]:
+            for x in range(Map.thirdQ, Map.end):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    if self.EntityAttack(self.wwy, self.wwx, y, x):
+                        return True  
+        for x in range(Map.end):
+            for y in range(Map.end):
+                if self.EntityAttack(self.cwy, self.cwx, y, x):
+                    return True 
+        return False   
+                       
     def TakeDamage(self, attacker_unit, enemy_unit):
         print "attacker_unit =", attacker_unit
         print "enemy_unit =", enemy_unit
+        print attacker_unit.statistics
+        print enemy_unit.statistics
         damage_range = attacker_unit.statistics[Statistics.MaxDamage] - attacker_unit.statistics[Statistics.MinDamage]
-        print "damage_range =",damage_range
         damage = attacker_unit.statistics[Statistics.Attack] * (attacker_unit.statistics[Statistics.MinDamage] + random.randint(0, damage_range))
-        print "enemy_unit.statistics[Statistics.HitPoints] =",enemy_unit.statistics[Statistics.HitPoints]
+        print "enemy_unit.hp =",enemy_unit.statistics[Statistics.HitPoints]
         print "damage =",damage
         enemy_unit.statistics[Statistics.HitPoints] -= int(round(float(damage / enemy_unit.statistics[Statistics.Defence])))
-        print "enemy_unit.statistics[Statistics.HitPoints] =",enemy_unit.statistics[Statistics.HitPoints]
+        print "enemy_unit.hp =",enemy_unit.statistics[Statistics.HitPoints]
                     
-    def FindFirstEnemyNorth(self, pos, attack_range):
-        print "FindFirstEnemyNorth\n"
+    def FindEnemy(self, pos, unit):
+        print "FindEnemy\n"
+        attack_range = unit.statistics[Statistics.Range]
         for y_range in range(attack_range + 1):
             for x_range in range(attack_range + 1):
-                print y_range, x_range
-                pos_e = Pos(pos.wy, pos.wx, pos.y + y_range, pos.x + x_range)
-                instance = Map.Get(pos_e)
-                if isinstance(instance, Units.Unit) or isinstance(instance, Buildings.Building):
-                    if instance.owner != self.attacker:
-                        print "Enemy founded at: " + str(pos_e.y) + " " + str(pos_e.x) + "\n"
-                        return True, pos_e
-                pos_e = Pos(pos.wy, pos.wx, pos.y + y_range, pos.x - x_range)
-                instance = Map.Get(pos_e)
-                if isinstance(instance, Units.Unit) or isinstance(instance, Buildings.Building):
-                    if instance.owner != self.attacker:
-                        print "Enemy founded at: " + str(pos_e.y) + " " + str(pos_e.x) + "\n"
-                        return True, pos_e
+                if unit.army == Geo.NORTH:
+                    ny1, nx1 = pos.y + y_range, pos.x + x_range
+                    ny2, nx2 = pos.y + y_range, pos.x - x_range
+                elif unit.army == Geo.SOUTH:
+                    ny1, nx1 = pos.y - y_range, pos.x + x_range
+                    ny2, nx2 = pos.y - y_range, pos.x - x_range
+                elif unit.army == Geo.EAST:
+                    ny1, nx1 = pos.y + y_range, pos.x - x_range
+                    ny2, nx2 = pos.y - y_range, pos.x - x_range
+                elif unit.army == Geo.WEST:
+                    ny1, nx1 = pos.y + y_range, pos.x + x_range
+                    ny2, nx2 = pos.y - y_range, pos.x + x_range
+                else:
+                    ny1, nx1 = pos.y + y_range, pos.x + x_range
+                    ny2, nx2 = pos.y - y_range, pos.x + x_range
+                    ny3, nx3 = pos.y + y_range, pos.x - x_range
+                    ny4, nx4 = pos.y - y_range, pos.x - x_range
+                succes, dst_pos = self.CheckEnemy(unit, pos.wy, pos.wx, ny1, nx1)
+                if succes:
+                    return succes, dst_pos
+                succes, dst_pos = self.CheckEnemy(unit, pos.wy, pos.wx, ny2, nx2)
+                if succes:
+                    return succes, dst_pos
+                if unit.army == Geo.CENTRAL:
+                    succes, dst_pos = self.CheckEnemy(unit, pos.wy, pos.wx, ny3, nx3)
+                    if succes:
+                        return succes, dst_pos  
+                    succes, dst_pos = self.CheckEnemy(unit, pos.wy, pos.wx, ny4, nx4)
+                    if succes:
+                        return succes, dst_pos     
         return False, 0
-                
+        
+    def CheckEnemy(self, unit, wy, wx, y, x):
+        dst_pos = Pos(wy, wx, y, x)
+        enemy_object = Map.Get(dst_pos)
+        if isinstance(enemy_object, Units.Unit) or isinstance(enemy_object, Buildings.Building):
+            if enemy_object.owner != unit.owner:
+                print "Enemy " + str(enemy_object) + " founded at: " + str(dst_pos.y) + " " + str(dst_pos.x) + "\n"
+                return True, dst_pos 
+        return False, 0 
+    
+    def CheckUnit(self, wy, wx, y, x):
+        unit = Map.Get(Pos(wy, wx, y, x))
+        if isinstance(unit, Units.Unit) and self.attacker == unit.owner:
+            return True
+        return False
+    
+    def CheckUnits(self):
+        print "CheckUnits\n"
+        if self.army[Geo.NORTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.thirdQ, Map.end):
+                    if self.CheckUnit(self.nwy, self.nwx, y, x):
+                        return True
+        if self.army[Geo.SOUTH]:
+            for x in range(Map.firstQ, Map.thirdQ):
+                for y in range(Map.firstQ):
+                    if self.CheckUnit(self.swy, self.swx, y, x):
+                        return True
+        if self.army[Geo.EAST]:
+            for x in range(Map.firstQ):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    if self.CheckUnit(self.ewy, self.ewx, y, x):
+                        return True
+        if self.army[Geo.WEST]:
+            for x in range(Map.thirdQ, Map.end):
+                for y in range(Map.firstQ, Map.thirdQ):
+                    if self.CheckUnit(self.wwy, self.wwx, y, x):
+                        return True
+        for x in range(Map.end):
+            for y in range(Map.end):
+                if self.CheckUnit(self.cwy, self.cwx, y, x):
+                    return True
+        return False
                 

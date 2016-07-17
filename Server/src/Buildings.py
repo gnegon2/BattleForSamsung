@@ -2,6 +2,7 @@ from Resources import Resources
 from Commands import BuildingCommands
 from Colors import Colors
 from Statistics import Statistics
+from copy import copy
 import Utility
 import Map
 
@@ -101,7 +102,7 @@ class Fortress(Building):
         
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         self.production = self.__class__.production
         
         self.army_production = self.__class__.army_production
@@ -134,7 +135,7 @@ class House(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         
         self.army_production = self.__class__.army_production
         self.owner.info.maxNumberOfUnits += self.army_production
@@ -166,7 +167,7 @@ class Bank(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         self.production = self.__class__.production
     
     @staticmethod
@@ -191,7 +192,7 @@ class SawMill(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         self.production = self.__class__.production
     
     @staticmethod
@@ -216,7 +217,7 @@ class Mine(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         self.production = self.__class__.production
     
     @staticmethod
@@ -241,7 +242,7 @@ class CrystalMine(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         self.production = self.__class__.production
     
     @staticmethod
@@ -263,7 +264,7 @@ class Wall(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
     
     @staticmethod
     def ExtraInfo():
@@ -284,7 +285,7 @@ class Tower(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
     
     @staticmethod
     def ExtraInfo():
@@ -305,7 +306,7 @@ class Library(Building):
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
-        self.statistics = self.__class__.statistics
+        self.statistics = copy(self.__class__.statistics)
         
         fortress = Map.GetFort(self.owner.wy, self.owner.wx)
         fortress.level += 1

@@ -1,3 +1,4 @@
+CENTRAL = "Central"
 NORTH = "North"
 SOUTH = "South"
 EAST = "East"
