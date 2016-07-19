@@ -13,15 +13,40 @@ thirdQ = 3*Config.localMapSize/4
 end =  Config.localMapSize
 
 def GetFort(wy, wx):
-    pos = Pos(wy, wx, half, half)
-    return Get(pos)
+    fort = Get(Pos(wy, wx, half-1, half-1))
+    if isinstance(fort, Buildings.Fortress):
+        return fort
+    fort = Get(Pos(wy, wx, half, half-1))
+    if isinstance(fort, Buildings.Fortress):
+        return fort
+    fort = Get(Pos(wy, wx, half-1, half))
+    if isinstance(fort, Buildings.Fortress):
+        return fort
+    fort = Get(Pos(wy, wx, half, half))
+    if isinstance(fort, Buildings.Fortress):
+        return fort
+    return None
 
 def SetFort(player, wy, wx):
     Set(player, Buildings.Fortress, Pos(wy, wx, half - 1, half - 1))
     Set(player, Buildings.Fortress, Pos(wy, wx, half - 1, half))
     Set(player, Buildings.Fortress, Pos(wy, wx, half, half - 1))
     Set(player, Buildings.Fortress, Pos(wy, wx, half, half))
-
+    
+def ChangeFortLevel(wy, wx, level):
+    fort = Get(Pos(wy, wx, half-1, half-1))
+    if isinstance(fort, Buildings.Fortress):
+        fort.level += level
+    fort = Get(Pos(wy, wx, half, half-1))
+    if isinstance(fort, Buildings.Fortress):
+        fort.level += level
+    fort = Get(Pos(wy, wx, half-1, half))
+    if isinstance(fort, Buildings.Fortress):
+        fort.level += level
+    fort = Get(Pos(wy, wx, half, half))
+    if isinstance(fort, Buildings.Fortress):
+        fort.level += level
+    
 def Get(pos):
     return weakref.proxy(fields[pos.wy*end+pos.y][pos.wx*end+pos.x])
 

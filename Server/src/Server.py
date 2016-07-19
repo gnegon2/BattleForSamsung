@@ -6,20 +6,22 @@ import State
 import Log
 import Game
 
-import BattleTest
+#import BattleTest
 
 def Session(connection, client_address):
     Log.Save("New player connected!\n") 
     try:
         player = Player(connection)
-        initialize = False
+        #initialize = False
         while player.state != State.EXITING:
             if player.state == State.INIT:
                 Game.MainMenu(player)
             if player.loggedIn:
-                if not initialize:
-                    BattleTest.Init(player)
-                    initialize = True
+                #===============================================================
+                # if not initialize:
+                #     BattleTest.Init(player)
+                #     initialize = True
+                #===============================================================
                 if player.state == State.WORLD_MAP:
                     Game.WorldMapMenu(player)
                 elif player.state == State.LOCAL_MAP:

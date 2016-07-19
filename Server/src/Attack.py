@@ -27,11 +27,10 @@ def AttackFortress(player, wy, wx):
         if any(geo for geo in army):
             Log.Save("Army near fortress!\n")
             battle = Battle(player, army, wy, wx)
-            if battle.Start():
+            if battle.Start(player):
                 Log.Save(player.username + " destroy enemy fortress!\n")
                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Victory!\nReturning to World Map!\n")
-                fort = Map.GetFort(wy, wx)
-                fort.owner = player
+                return True
             else:
                 Log.Save(player.username + " losses the battle!\n")
                 Utility.SendMsg(player, Colors.COLOR_RED + "Lose!\nReturning to World Map!\n")
@@ -39,21 +38,22 @@ def AttackFortress(player, wy, wx):
             Utility.SendMsg(player, Colors.COLOR_RED + "You have no army near attacking fortress!\n")
     else:
         Utility.SendMsg(player, Colors.COLOR_RED + "You have no fortress near attacking fortress!\n")
+    return False
 
 def CheckNearFortress(player, wy, wx):
     fortress = {}
     fortress[Geo.NORTH] = fortress[Geo.SOUTH] = fortress[Geo.EAST] = fortress[Geo.WEST] = False
     fort = Map.GetFort(wy - 1, wx)
-    if hasattr(fort, 'owner') and fort.owner == player:
+    if fort is not None and fort.owner.username == player.username:
         fortress[Geo.NORTH] = True;
     fort = Map.GetFort(wy + 1, wx)
-    if hasattr(fort, 'owner') and fort.owner == player:
+    if fort is not None and fort.owner.username == player.username:
         fortress[Geo.SOUTH] = True;
     fort = Map.GetFort(wy, wx + 1)
-    if hasattr(fort, 'owner') and fort.owner == player:
+    if fort is not None and fort.owner.username == player.username:
         fortress[Geo.EAST] = True;
     fort = Map.GetFort(wy, wx - 1)
-    if hasattr(fort, 'owner') and fort.owner == player:
+    if fort is not None and fort.owner.username == player.username:
         fortress[Geo.WEST] = True;
     return fortress
 

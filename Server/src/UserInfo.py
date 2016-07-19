@@ -19,3 +19,31 @@ class UserInfo():
         self.numberOfUnits = 0
         self.color = random.sample(colors,  1)[0]
         colors.remove(self.color)
+        
+    def CheckLastBuild(self):
+        actualTime = time.localtime(time.time())
+        if self.LastBuild.tm_year < actualTime.tm_year or \
+            self.LastBuild.tm_mon < actualTime.tm_mon or \
+            self.LastBuild.tm_mday < actualTime.tm_mday or \
+            self.LastBuild.tm_hour + 6 < actualTime.tm_hour:
+            self.LastBuild = actualTime
+            self.buildingsBuildToday = 0
+    
+    def CheckLastRecruit(self):
+        actualTime = time.localtime(time.time())
+        if self.LastRecruit.tm_year < actualTime.tm_year or \
+            self.LastRecruit.tm_mon < actualTime.tm_mon or \
+            self.LastRecruit.tm_mday < actualTime.tm_mday or \
+            self.LastBuild.tm_hour + 6 < actualTime.tm_hour:
+            self.LastRecruit = actualTime
+            self.unitsRecruitedToday = 0
+    
+    def CheckLastGetProduction(self):
+        actualTime = time.localtime(time.time())
+        if self.LastGathered.tm_year < actualTime.tm_year or \
+            self.LastGathered.tm_mon < actualTime.tm_mon or \
+            self.LastGathered.tm_mday < actualTime.tm_mday or \
+            self.LastGathered.tm_hour + 6 < actualTime.tm_hour:
+            self.LastGathered = actualTime
+            return True
+        return False

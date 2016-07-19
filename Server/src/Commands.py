@@ -52,6 +52,8 @@ class WorldMapCommands:
     _2_2_ENTER_FORTRESS = "EnterFortress"
     _3_0_GET_PRODUCTION = "GetProduction"
     _4_2_ATTACK_FORTRESS = "AttackFortress"
+    _5_2_REPAIR_FORTRESS = "RepairFortress"
+    _6_3_MOVE_ARMY = "MoveArmy"
     
     @staticmethod
     def Color():
@@ -61,6 +63,7 @@ class LocalMapCommands:
     _0_0_BUILDINGS = "Buildings"
     _1_0_ARMY = "Army" 
     _2_2_DESTROY = "Destroy"
+    _3_2_REPAIR = "Repair"
     
     @staticmethod
     def Color():
@@ -112,7 +115,12 @@ class BattleCommands:
         return Colors.COLOR_ORANGE
 
 class ScoutingCommands:
-    _0_0_SHOW_ENEMY_INFO = "ShowEnemyInfo"
+    _0_0_SHOW_INFO = "ShowInfo"
+    _1_0_SCOUT_ENTIRE_MAP = "ScoutEntireMap"
+    _2_0_SCOUT_NORTH_MAP = "ScoutNorthMap"
+    _3_0_SCOUT_SOUTH_MAP = "ScoutSouthMap"
+    _4_0_SCOUT_EAST_MAP = "ScoutEastMap"
+    _5_0_SCOUT_WEST_MAP = "ScoutWestMap"
     
     @staticmethod
     def Color():
@@ -126,6 +134,8 @@ def GetCommands(commands):
                 msg += commands.Color() + value + "\n"
             elif key[3] == "2":
                 msg += commands.Color() + value + " Y X\n"
+            elif key[3] == "3":
+                msg += commands.Color() + value + " Y X N\n"
             elif key[3] == "4":
                 msg += commands.Color() + value + " Y1 X1 Y2 X2\n" 
     return msg  

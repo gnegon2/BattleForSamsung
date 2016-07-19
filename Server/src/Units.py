@@ -24,16 +24,6 @@ def CommandToUnit(command):
         return Cannon
     else:
         return Empty
-
-def Buy(player, unit):
-    for resType, resAmount in unit.cost.iteritems():
-        resDiff = resAmount - player.resources[resType]
-        if resDiff > 0:
-            Utility.SendMsg(player, Colors.COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n")
-            return False
-    for resType, resAmount in unit.cost.iteritems():
-        player.resources[resType] -= resAmount
-    return True
     
 def ShowInfo(player, unit):
     Utility.SendMsg(player, Colors.COLOR_AZURE + unit.__name__ + ": \n")
@@ -52,9 +42,8 @@ class Empty():
     'Empty Unit'
 
 class Unit(object): 
-    
-    def __new__(typ, *args, **kwargs):
-        obj = object.__new__(typ, *args, **kwargs)
+    def __new__(cls, *args, **kwargs):
+        obj = object.__new__(cls, *args, **kwargs)
         obj.owner = args[0]
         obj.owner.info.numberOfUnits += 1
         print "obj.owner.info.numberOfUnits=" + str(obj.owner.info.numberOfUnits)
@@ -69,7 +58,7 @@ class Peasant(Unit):
     cost = Resources()
     cost.Init(5)
     statistics = Statistics()
-    statistics.Init(10, 2, 1, 1, 2, 1, 1)
+    statistics.Init(15, 3, 2, 2, 4, 1, 1)
     
     def __init__(self, player):
         self.field = self.__class__.field
@@ -85,7 +74,7 @@ class Archer(Unit):
     cost = Resources()
     cost.Init(20)
     statistics = Statistics()
-    statistics.Init(20, 3, 2, 2, 4, 3, 1)
+    statistics.Init(20, 3, 3, 3, 4, 3, 1)
         
     def __init__(self, player):
         self.field = self.__class__.field
@@ -101,7 +90,7 @@ class Swordman(Unit):
     cost = Resources()
     cost.Init(50, 0, 1)
     statistics = Statistics()
-    statistics.Init(50, 8, 6, 5, 8, 1, 1)
+    statistics.Init(40, 6, 5, 5, 8, 1, 1)
     
     def __init__(self, player):
         self.field = self.__class__.field
@@ -117,11 +106,11 @@ class Pikeman(Unit):
     cost = Resources()
     cost.Init(70, 1)
     statistics = Statistics()
-    statistics.Init(70, 10, 7, 6, 12, 2, 2)
+    statistics.Init(60, 8, 7, 6, 8, 2, 2)
     
     def __init__(self, player):
         self.field = self.__class__.field
-        self.color = Colors.COLOR_GRANAT
+        self.color = Colors.COLOR_AZURE
         self.statistics = copy(self.__class__.statistics)     
     
     @staticmethod
@@ -133,7 +122,7 @@ class Crossbowman(Unit):
     cost = Resources()
     cost.Init(80, 1, 1)
     statistics = Statistics()
-    statistics.Init(70, 8, 8, 10, 12, 4, 2)
+    statistics.Init(60, 8, 8, 10, 12, 4, 2)
                     
     def __init__(self, player):
         self.field = self.__class__.field
@@ -149,7 +138,7 @@ class Horseman(Unit):
     cost = Resources()
     cost.Init(100, 2)
     statistics = Statistics()
-    statistics.Init(100, 15, 10, 12, 15, 1, 4)
+    statistics.Init(80, 12, 10, 12, 15, 1, 4)
                     
     def __init__(self, player):
         self.field = self.__class__.field
@@ -165,7 +154,7 @@ class Catapult(Unit):
     cost = Resources()
     cost.Init(150, 2, 2)
     statistics = Statistics()
-    statistics.Init(150, 12, 15, 15, 20, 6, 1)
+    statistics.Init(100, 10, 15, 15, 20, 6, 1)
     
     def __init__(self, player):
         self.field = self.__class__.field

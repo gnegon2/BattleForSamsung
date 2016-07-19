@@ -22,7 +22,7 @@ class Player():
         
     def InitResources(self):
         self.resources = Resources()
-        self.resources.Init(2500, 100, 100, 50)
+        self.resources.Init(500, 25, 25, 3)
         Data.resources.append((self.username, self.resources))
         
     def LoadResources(self):
@@ -41,7 +41,17 @@ class Player():
         Utility.SendMsg(self, Colors.COLOR_STEEL + "maxNumberOfUnits: " + str(self.info.maxNumberOfUnits) + "\n")
         Utility.SendMsg(self, Colors.COLOR_VIOLET + "numberOfUnits: " + str(self.info.numberOfUnits) + "\n")   
         
-        
+    def Pay(self, cost, percent):
+        for resType, resAmount in cost.iteritems():
+            pAmount = int(resAmount * percent/100.0)
+            resDiff = pAmount - self.resources[resType]
+            if resDiff > 0:
+                Utility.SendMsg(self, Colors.COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n" )
+                return False
+        for resType, resAmount in cost.iteritems():
+            pAmount = int(resAmount * percent/100.0)
+            self.resources[resType] -= pAmount
+        return True
         
         
         

@@ -1,5 +1,6 @@
 from Commands import MenuCommands, MainCommands, LocalMapCommands, WorldMapCommands
 from Colors import Colors
+import Map
 import Log
 import WorldMap
 import LocalMap
@@ -106,6 +107,7 @@ def WorldMapMenu(player):
     while player.state == State.WORLD_MAP:
         Utility.SendMsg(player, Control.CTRL_MENU_WORLD_MAP)
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
+        Log.Save(player.username + " enter command: " + command + "\n")
         WorldMap.ExecuteCommand(player, command)   
 
 def LocalMapMenu(player):
@@ -121,4 +123,10 @@ def LocalMapMenu(player):
     while player.state == State.LOCAL_MAP:
         Utility.SendMsg(player, Control.CTRL_MENU_LOCAL_MAP)
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
-        LocalMap.ExecuteCommand(player, command)  
+        Log.Save(player.username + " enter command: " + command + "\n")
+        fort = Map.GetFort(player.wy, player.wx) 
+        if fort is not None and fort.owner.username == player.username:
+            LocalMap.ExecuteCommand(player, command)
+        else:
+            player.state = State.WORLD_MAP
+            Utility.SendMsg(player, "Fortress overtaken!\n Returning to World Map!\n")  

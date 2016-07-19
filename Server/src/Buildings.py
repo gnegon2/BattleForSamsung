@@ -24,18 +24,8 @@ def CommandToBuilding(command):
     elif command == BuildingCommands._7_0_LIBRARY:
         return Library
     else:
-        return Empty
+        return Empty;
     
-def Pay(player, building):
-    for resType, resAmount in building.cost.iteritems():
-        resDiff = resAmount - player.resources[resType]
-        if resDiff > 0:
-            Utility.SendMsg(player, Colors.COLOR_RED + "You need " + str(resDiff) + " more " + resType.name + "!\n" )
-            return False
-    for resType, resAmount in building.cost.iteritems():
-        player.resources[resType] -= resAmount
-    return True
-
 def ShowInfo(player, building):
     Utility.SendMsg(player, Colors.COLOR_AZURE + building.__name__ + ": \n")
     Utility.SendMsg(player, building.ExtraInfo())
@@ -55,17 +45,16 @@ def ShowInfo(player, building):
         if iAmount > 0:
             Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")    
     
-def GetProduction(player, building):
+def GetProduction(resource, building):
     if hasattr(building, 'production'):
-        Utility.SendMsg(player, Colors.COLOR_AZURE + building.__class__.__name__ + " produce: \n")
         for iType, iAmount in building.production.iteritems():
             if iAmount > 0:
-                Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")
-                player.resources[iType] += iAmount
+                resource[iType] += iAmount
+    return resource
 
 class Building(object):
-    def __new__(typ, *args, **kwargs):
-        obj = object.__new__(typ, *args, **kwargs)
+    def __new__(cls, *args, **kwargs):
+        obj = object.__new__(cls, *args, **kwargs)
         obj.owner = args[0]
         return obj
 
@@ -90,10 +79,10 @@ class Fortress(Building):
     cost.Init(200, 5, 5, 1)
     
     production = Resources()
-    production.Init(80, 4, 4)
+    production.Init(20, 1, 1)
     
     statistics = Statistics()
-    statistics.Init(1000, 10, 10, 5, 10, 1)
+    statistics.Init(250, 10, 3, 3, 5, 6)
     
     army_production = 1
     
@@ -128,7 +117,7 @@ class House(Building):
     cost.Init(50, 4, 2)
     
     statistics = Statistics()
-    statistics.Init(250, 30)
+    statistics.Init(120, 4)
       
     army_production = 5
         
@@ -162,7 +151,7 @@ class Bank(Building):
     production.Init(60)
     
     statistics = Statistics()
-    statistics.Init(100, 20)
+    statistics.Init(80, 4)
         
     def __init__(self, player):
         self.field = self.__class__.field
@@ -187,7 +176,7 @@ class SawMill(Building):
     production.Init(0, 5)
     
     statistics = Statistics()
-    statistics.Init(200, 25)
+    statistics.Init(80, 4)
     
     def __init__(self, player):
         self.field = self.__class__.field
@@ -212,7 +201,7 @@ class Mine(Building):
     production.Init(0, 0, 5)
     
     statistics = Statistics()
-    statistics.Init(100, 20)  
+    statistics.Init(100, 5)  
         
     def __init__(self, player):
         self.field = self.__class__.field
@@ -237,7 +226,7 @@ class CrystalMine(Building):
     production.Init(0, 0, 0, 1)
     
     statistics = Statistics()
-    statistics.Init(150, 30) 
+    statistics.Init(120, 5) 
         
     def __init__(self, player):
         self.field = self.__class__.field
@@ -253,13 +242,13 @@ class CrystalMine(Building):
     
 class Wall(Building):
     field = "W"
-    color = Colors.COLOR_GRANAT
+    color = Colors.COLOR_AZURE
     
     cost = Resources()
     cost.Init(40, 1, 1)
     
     statistics = Statistics()
-    statistics.Init(500, 50) 
+    statistics.Init(100, 10) 
         
     def __init__(self, player):
         self.field = self.__class__.field
@@ -277,10 +266,10 @@ class Tower(Building):
     color = Colors.COLOR_BLOOD
     
     cost = Resources()
-    cost.Init(120, 3, 3)
+    cost.Init(250, 3, 3, 1)
     
     statistics = Statistics()
-    statistics.Init(700, 60, 20, 10, 20, 3) 
+    statistics.Init(150, 8, 6, 8, 10, 6) 
         
     def __init__(self, player):
         self.field = self.__class__.field
@@ -301,21 +290,17 @@ class Library(Building):
     cost.Init(150, 4, 4, 1)
     
     statistics = Statistics()
-    statistics.Init(50, 10)  
+    statistics.Init(50, 4)  
         
     def __init__(self, player):
         self.field = self.__class__.field
         self.color = self.__class__.color
         self.statistics = copy(self.__class__.statistics)
         
-        fortress = Map.GetFort(self.owner.wy, self.owner.wx)
-        fortress.level += 1
-        print "librariesCount=" + str(fortress.level)
+        Map.ChangeFortLevel(self.owner.wy, self.owner.wx, 1)
         
     def __del__(self):
-        fortress = Map.GetFort(self.owner.wy, self.owner.wx)
-        fortress.level -= 1
-        print "librariesCount=" + str(fortress.level)
+        Map.ChangeFortLevel(self.owner.wy, self.owner.wx, -1)
     
     @staticmethod
     def ExtraInfo():

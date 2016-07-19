@@ -8,16 +8,16 @@ global debug
 debug = True
 
 global port
-port = 50001
+port = 50000
 
 global localMapSize
 localMapSize = 20
 
 global maxBuildingsPerDay
-maxBuildingsPerDay = 4
+maxBuildingsPerDay = 3
 
 global maxUnitsPerDay
-maxUnitsPerDay = 4
+maxUnitsPerDay = 3
 
 global randomColors
 randomColors = True
