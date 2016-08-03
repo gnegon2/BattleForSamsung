@@ -17,6 +17,7 @@ import re
 import Map
 import Statistics
 import Geo
+from Buildings import Fortress
  
 def ParseCommandXY(player, command):
     try:
@@ -54,14 +55,17 @@ def ExecuteCommand(player, command):
     elif command == LocalMapCommands._1_0_ARMY:
         UnitsMenu(player)
     elif command.find(LocalMapCommands._2_2_DESTROY) != -1 or \
-         command.find(LocalMapCommands._3_2_REPAIR) != -1:
+         command.find(LocalMapCommands._3_2_REPAIR) != -1 or \
+         command.find(LocalMapCommands._4_2_SHOW_DETAIL_INFO) != -1:
         succes, y, x = ParseCommandXY(player, command)
         if succes:
             if command.find(LocalMapCommands._2_2_DESTROY) != -1:
                 Destroy(player, y, x)
-            else:
+            elif command.find(LocalMapCommands._3_2_REPAIR) != -1:
                 if not Repair(player, y, x):
                     Utility.SendMsg(player, Colors.COLOR_RED + "Nothing to repair!\n")
+            elif command.find(LocalMapCommands._4_2_SHOW_DETAIL_INFO) != -1:
+                ShowDetailInfo(player, y, x)
     else:
         Utility.SendMsg(player, Colors.COLOR_RED + "Undefined command!\n")
    
@@ -116,6 +120,8 @@ def BuildingMenu(player):
                 Utility.SendMsg(player, Control.CTRL_EXIT)
                 player.state = State.EXITING
             # MainCommands <<<
+            elif command == BuildingCommands._8_0_UPGRADE_FORTRESS:
+                UpgradeFortress(player)
             else:
                 building = Buildings.CommandToBuilding(command)
                 if isinstance(building, Buildings.Empty):
@@ -169,7 +175,7 @@ def CreateBuilding(player, building, y, x):
     Log.Save(player.username + " try to create building\n")
     if Map.firstQ <= x < Map.thirdQ and Map.firstQ <= y < Map.thirdQ:
         player.info.CheckLastBuild()
-        if player.info.buildingsBuildToday < Config.maxBuildingsPerDay:
+        if player.info.buildingsBuildToday < Config.maxBuildingsPerDay or Config.maxBuildingsPerDay == 0:
             pos = Pos(player.wy, player.wx, y, x)
             field = Map.Get(pos)
             if isinstance(field, Buildings.Empty):
@@ -290,7 +296,7 @@ def RecruitUnit(player, unit, y, x):
     Log.Save(player.username + " try to recruit unit\n")
     player.info.CheckLastRecruit()
     if player.info.numberOfUnits <= player.info.maxNumberOfUnits:
-        if player.info.unitsRecruitedToday < Config.maxUnitsPerDay:
+        if player.info.unitsRecruitedToday < Config.maxUnitsPerDay or Config.maxUnitsPerDay == 0:
             pos = Pos(player.wy, player.wx, y, x)
             field = Map.Get(pos)
             if isinstance(field, Buildings.Empty):
@@ -298,7 +304,7 @@ def RecruitUnit(player, unit, y, x):
                     player.info.unitsRecruitedToday += 1
                     Map.Set(player, unit, pos)
                     Utility.SendMsg(player, Colors.COLOR_GREEN + "Unit recruited!\n") 
-                    Log.Save(player.username + " recruit unit:" + unit.__class__.__name__ +"\n") 
+                    Log.Save(player.username + " recruit unit:" + unit.__name__ +"\n") 
                 else:
                     Utility.SendMsg(player, Colors.COLOR_RED + "Not enough resources!\n") 
             else:
@@ -446,3 +452,26 @@ def OvertakeFortress(player, wy, wx):
     for entity, y, x in entity_list:
         pos = Pos(wy, wx, y, x)
         Map.Set(player, entity.__class__, pos)
+
+def UpgradeFortress(player):
+    fort = Map.GetFort(player.wy, player.wx)
+    level = fort.level
+    if level <= len(Fortress.production_per_level):
+        cost = Buildings.Fortress.cost_per_level[level-1]
+        if player.Pay(cost, 100.0):
+            Map.ChangeFortLevel(player.wy, player.wx, 1)
+            Utility.SendMsg(player, Colors.COLOR_GREEN + "Successfully upgraded fortress!\n")
+    else:
+        Utility.SendMsg(player, Colors.COLOR_GREEN + "Fortress maximally upgraded!\n")
+        
+def ShowDetailInfo(player, y, x):
+    pos = Pos(player.wy, player.wx, y, x)
+    field = Map.Get(pos)
+    if not isinstance(field, Buildings.Empty) and not isinstance(field, Buildings.Forbidden):
+        if isinstance(field, Buildings.Building):
+            Buildings.ShowInfo(player, field)
+        elif isinstance(field, Units.Unit):
+            Units.ShowInfo(player, field)
+    else:
+        Utility.SendMsg(player, Colors.COLOR_RED + "Field is empty!\n")
+    

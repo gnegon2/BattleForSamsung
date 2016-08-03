@@ -64,6 +64,7 @@ class LocalMapCommands:
     _1_0_ARMY = "Army" 
     _2_2_DESTROY = "Destroy"
     _3_2_REPAIR = "Repair"
+    _4_2_SHOW_DETAIL_INFO = "ShowDetailInfo"
     
     @staticmethod
     def Color():
@@ -78,6 +79,7 @@ class BuildingCommands:
     _5_0_WALL = "Wall"
     _6_0_TOWER = "Tower"
     _7_0_LIBRARY = "Library"
+    _8_0_UPGRADE_FORTRESS = "UpgradeFortress"
     
     @staticmethod
     def Color():
@@ -142,10 +144,11 @@ def GetCommands(commands):
 
 def GetUnitCommands(level):
     msg = ""
+    msg += UnitsCommands.Color() + UnitsCommands._0_4_MOVE_UNIT + " Y1 X1 Y2 X2\n"
     for key, value in sorted(vars(UnitsCommands).iteritems()):
         if not (key.startswith('__')) and isinstance(value, basestring):
             unit_level = int(key[1])
-            if unit_level <= level:
+            if 0 < unit_level <= level:
                 msg += UnitsCommands.Color() + value + "\n" 
     return msg  
         

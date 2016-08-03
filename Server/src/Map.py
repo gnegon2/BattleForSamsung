@@ -35,17 +35,25 @@ def SetFort(player, wy, wx):
     
 def ChangeFortLevel(wy, wx, level):
     fort = Get(Pos(wy, wx, half-1, half-1))
-    if isinstance(fort, Buildings.Fortress):
-        fort.level += level
+    UpgradeFortress(fort, level) 
     fort = Get(Pos(wy, wx, half, half-1))
-    if isinstance(fort, Buildings.Fortress):
-        fort.level += level
+    UpgradeFortress(fort, level)
     fort = Get(Pos(wy, wx, half-1, half))
-    if isinstance(fort, Buildings.Fortress):
-        fort.level += level
+    UpgradeFortress(fort, level)
     fort = Get(Pos(wy, wx, half, half))
+    UpgradeFortress(fort, level)
+        
+def UpgradeFortress(fort, level):
     if isinstance(fort, Buildings.Fortress):
         fort.level += level
+        production = Buildings.Fortress.production_per_level[level-1]
+        for resType, resAmount in production.iteritems():
+            if resAmount > 0:
+                fort.production[resType] += resAmount
+        statistics = Buildings.Fortress.statistics_per_level[level-1]
+        for statType, statAmount in statistics.iteritems():
+            if statAmount > 0:
+                fort.statistics[statType] += statAmount
     
 def Get(pos):
     return weakref.proxy(fields[pos.wy*end+pos.y][pos.wx*end+pos.x])

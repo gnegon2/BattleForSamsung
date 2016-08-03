@@ -32,7 +32,7 @@ def Session(connection, client_address):
     except socket.error:
         Log.Save("Client end connection!\n")
     except Exception as inst:
-        Log.Save(inst.__str__())
+        Log.Save(inst.__str__() + "\n")
         Log.Save("Server close connection!\n")
      
 def Start():

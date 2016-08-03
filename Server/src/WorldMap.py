@@ -81,6 +81,7 @@ def ParseCommandThree(player, command):
                 return False, 0, 0, 0   
             Utility.SendMsg(player, Colors.COLOR_RED + \
                                 "Wrong direction! Possible directions are: N, S, E, W\n")
+            return False, 0, 0, 0
             
     except ValueError:
         Utility.SendMsg(player, Colors.COLOR_RED + \
@@ -187,15 +188,12 @@ def EnterFortress(player, wy, wx):
         Utility.SendMsg(player, Colors.COLOR_RED + "Field is empty!\n")
         
 def GetProduction(player):
-    if player.info.CheckLastGetProduction():
-        for wy in range(Map.y_size):
-            for wx in range(Map.x_size):
-                fort = Map.GetFort(wy, wx)
-                if isinstance(fort, Buildings.Fortress) and fort.owner == player:
-                    LocalMap.GetProduction(player, wy, wx)  
-        Utility.SendMsg(player, Colors.COLOR_GREEN + "All production gathered!\n")   
-    else:
-        Utility.SendMsg(player, Colors.COLOR_RED + "Production already gathered!\n") 
+    for wy in range(Map.y_size):
+        for wx in range(Map.x_size):
+            fort = Map.GetFort(wy, wx)
+            if isinstance(fort, Buildings.Fortress) and fort.owner.username == player.username:
+                LocalMap.GetProduction(player, wy, wx)  
+    Utility.SendMsg(player, Colors.COLOR_GREEN + "All production gathered!\n")   
         
 def AttackFortress(player, wy ,wx):
     fort = Map.GetFort(wy, wx)

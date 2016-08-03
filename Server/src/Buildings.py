@@ -4,7 +4,80 @@ from Colors import Colors
 from Statistics import Statistics
 from copy import copy
 import Utility
-import Map
+import time
+import inspect
+
+def InitFortressLevels():
+    # Level 2
+    level_cost_2 = Resources()
+    level_cost_2.Init(200, 5, 5, 0, 2)
+    Fortress.cost_per_level.append(level_cost_2)
+    level_production_2 = Resources()
+    level_production_2.Init(10)
+    Fortress.production_per_level.append(level_production_2)
+    level_statistics_2 = Statistics()
+    level_statistics_2.Init(100, 2, 1)
+    Fortress.statistics_per_level.append(level_statistics_2)
+    # Level 3
+    level_cost_3 = Resources()
+    level_cost_3.Init(400, 7, 7, 0, 4)
+    Fortress.cost_per_level.append(level_cost_3)
+    level_production_3 = Resources()
+    level_production_3.Init(30)
+    Fortress.production_per_level.append(level_production_3)
+    level_statistics_3 = Statistics()
+    level_statistics_3.Init(100, 2, 1, 1, 2)
+    Fortress.statistics_per_level.append(level_statistics_3)
+    # Level 4
+    level_cost_4 = Resources()
+    level_cost_4.Init(600, 8, 8, 1, 8)
+    Fortress.cost_per_level.append(level_cost_4)
+    level_production_4 = Resources()
+    level_production_4.Init(40, 1, 1)
+    Fortress.production_per_level.append(level_production_4)
+    level_statistics_4 = Statistics()
+    level_statistics_4.Init(100, 2, 1, 1, 2)
+    Fortress.statistics_per_level.append(level_statistics_4)
+    # Level 5
+    level_cost_5 = Resources()
+    level_cost_5.Init(800, 9, 9, 1, 12)
+    Fortress.cost_per_level.append(level_cost_5)
+    level_production_5 = Resources()
+    level_production_5.Init(40)
+    Fortress.production_per_level.append(level_production_5)
+    level_statistics_5 = Statistics()
+    level_statistics_5.Init(100, 2, 1, 1, 2)
+    Fortress.statistics_per_level.append(level_statistics_5)
+    # Level 6
+    level_cost_6 = Resources()
+    level_cost_6.Init(1200, 10, 10, 2, 14)
+    Fortress.cost_per_level.append(level_cost_6)
+    level_production_6 = Resources()
+    level_production_6.Init(60)
+    Fortress.production_per_level.append(level_production_6)
+    level_statistics_6 = Statistics()
+    level_statistics_6.Init(100, 2, 1, 1, 2)
+    Fortress.statistics_per_level.append(level_statistics_6)
+    # Level 7
+    level_cost_7 = Resources()
+    level_cost_7.Init(1500, 10, 10, 2, 16)
+    Fortress.cost_per_level.append(level_cost_7)
+    level_production_7 = Resources()
+    level_production_7.Init(60, 1, 1)
+    Fortress.production_per_level.append(level_production_7)
+    level_statistics_7 = Statistics()
+    level_statistics_7.Init(100, 2, 1, 1, 2)
+    Fortress.statistics_per_level.append(level_statistics_7)
+    # Level 8
+    level_cost_8 = Resources()
+    level_cost_8.Init(2000, 12, 12, 3, 20)
+    Fortress.cost_per_level.append(level_cost_8)
+    level_production_8 = Resources()
+    level_production_8.Init(80)
+    Fortress.production_per_level.append(level_production_8)
+    level_statistics_8 = Statistics()
+    level_statistics_8.Init(100, 2, 1, 1, 2)
+    Fortress.statistics_per_level.append(level_statistics_8)
 
 def CommandToBuilding(command):
     if command == BuildingCommands._0_0_HOUSE:
@@ -27,8 +100,9 @@ def CommandToBuilding(command):
         return Empty;
     
 def ShowInfo(player, building):
-    Utility.SendMsg(player, Colors.COLOR_AZURE + building.__name__ + ": \n")
-    Utility.SendMsg(player, building.ExtraInfo())
+    if inspect.isclass(building):
+        Utility.SendMsg(player, Colors.COLOR_AZURE + building.__name__ + ": \n")
+        Utility.SendMsg(player, building.ExtraInfo())
     Utility.SendMsg(player, Colors.COLOR_ORANGE + "Cost: \n")
     for iType, iAmount in building.cost.iteritems():
         if iAmount > 0:
@@ -47,15 +121,22 @@ def ShowInfo(player, building):
     
 def GetProduction(resource, building):
     if hasattr(building, 'production'):
-        for iType, iAmount in building.production.iteritems():
-            if iAmount > 0:
-                resource[iType] += iAmount
+        actualTime = time.localtime(time.time())
+        if building.LastGathered.tm_year < actualTime.tm_year or \
+            building.LastGathered.tm_mon < actualTime.tm_mon or \
+            building.LastGathered.tm_mday < actualTime.tm_mday or \
+            building.LastGathered.tm_hour + 5 < actualTime.tm_hour:
+            building.LastGathered = actualTime
+            for iType, iAmount in building.production.iteritems():
+                if iAmount > 0:
+                    resource[iType] += iAmount
     return resource
 
 class Building(object):
     def __new__(cls, *args, **kwargs):
         obj = object.__new__(cls, *args, **kwargs)
         obj.owner = args[0]
+        obj.LastGathered = time.localtime(time.time() - 60*60*6)
         return obj
 
 class Empty():
@@ -75,12 +156,15 @@ class Fortress(Building):
     field = "F"
     color = Colors.COLOR_POPPY
         
+    cost_per_level = []
     cost = Resources()
-    cost.Init(200, 5, 5, 1)
+    cost.Init(500, 10, 10, 2)
     
+    production_per_level = []
     production = Resources()
     production.Init(20, 1, 1)
     
+    statistics_per_level = []
     statistics = Statistics()
     statistics.Init(250, 10, 3, 3, 5, 6)
     
@@ -96,11 +180,9 @@ class Fortress(Building):
         
         self.army_production = self.__class__.army_production
         self.owner.info.maxNumberOfUnits += self.army_production
-        print "self.owner.info.maxNumberOfUnits=" + str(self.owner.info.maxNumberOfUnits)
         
     def __del__(self):
         self.owner.info.maxNumberOfUnits -= self.army_production
-        print "del self.owner.info.maxNumberOfUnits=" + str(self.owner.info.maxNumberOfUnits)
     
     @staticmethod
     def ExtraInfo():
@@ -114,7 +196,7 @@ class House(Building):
     color = Colors.COLOR_GREEN
     
     cost = Resources()
-    cost.Init(50, 4, 2)
+    cost.Init(50, 2, 2)
     
     statistics = Statistics()
     statistics.Init(120, 4)
@@ -128,11 +210,9 @@ class House(Building):
         
         self.army_production = self.__class__.army_production
         self.owner.info.maxNumberOfUnits += self.army_production
-        print "self.owner.info.maxNumberOfUnits=" + str(self.owner.info.maxNumberOfUnits)
     
     def __del__(self):
         self.owner.info.maxNumberOfUnits -= self.army_production   
-        print "del self.owner.info.maxNumberOfUnits=" + str(self.owner.info.maxNumberOfUnits)
     
     @staticmethod
     def ExtraInfo():
@@ -170,7 +250,7 @@ class SawMill(Building):
     color = Colors.COLOR_WOOD
     
     cost = Resources()
-    cost.Init(40, 5)
+    cost.Init(40, 0, 5)
     
     production = Resources()
     production.Init(0, 5)
@@ -245,7 +325,7 @@ class Wall(Building):
     color = Colors.COLOR_AZURE
     
     cost = Resources()
-    cost.Init(40, 1, 1)
+    cost.Init(30, 1, 1)
     
     statistics = Statistics()
     statistics.Init(100, 10) 
@@ -266,7 +346,7 @@ class Tower(Building):
     color = Colors.COLOR_BLOOD
     
     cost = Resources()
-    cost.Init(250, 3, 3, 1)
+    cost.Init(250, 5, 5, 1)
     
     statistics = Statistics()
     statistics.Init(150, 8, 6, 8, 10, 6) 
@@ -287,7 +367,10 @@ class Library(Building):
     color = Colors.COLOR_AZURE
     
     cost = Resources()
-    cost.Init(150, 4, 4, 1)
+    cost.Init(200, 4, 4, 1)
+    
+    production = Resources()
+    production.Init(0, 0, 0, 0, 1)
     
     statistics = Statistics()
     statistics.Init(50, 4)  
@@ -296,14 +379,10 @@ class Library(Building):
         self.field = self.__class__.field
         self.color = self.__class__.color
         self.statistics = copy(self.__class__.statistics)
-        
-        Map.ChangeFortLevel(self.owner.wy, self.owner.wx, 1)
-        
-    def __del__(self):
-        Map.ChangeFortLevel(self.owner.wy, self.owner.wx, -1)
+        self.production = self.__class__.production
     
     @staticmethod
     def ExtraInfo():
         extraInfoMsg = Colors.COLOR_GREEN
-        extraInfoMsg += "Each library give you access to a new unit.\n"
+        extraInfoMsg += "Each library provide you science points.\n"
         return extraInfoMsg

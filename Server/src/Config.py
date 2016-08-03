@@ -14,10 +14,10 @@ global localMapSize
 localMapSize = 20
 
 global maxBuildingsPerDay
-maxBuildingsPerDay = 3
+maxBuildingsPerDay = 0
 
 global maxUnitsPerDay
-maxUnitsPerDay = 3
+maxUnitsPerDay = 0
 
 global randomColors
 randomColors = True

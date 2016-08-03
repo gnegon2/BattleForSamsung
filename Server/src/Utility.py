@@ -1,4 +1,3 @@
-import Crypt
 import Log
 import Control
 import Data
@@ -13,7 +12,7 @@ def SendMsg(player, data, response = False):
     return player.connection.recv(maxMsgResponse)
 
 def CheckUserName(username):
-    Log.Save("Checking username: " + username)
+    Log.Save("Checking username: " + username + "\n")
     for username_arg, password_arg in Data.users:
         password_arg
         if username_arg == username:
@@ -21,7 +20,7 @@ def CheckUserName(username):
     return False
 
 def CheckPassword(username, password):
-    Log.Save("Checking password for username: " + username)
+    Log.Save("Checking password for username: " + username + "\n")
     for username_arg, password_arg in Data.users:
         if username_arg == username:
             #decrypted_password = Crypt.Decrypt(password_arg, password)

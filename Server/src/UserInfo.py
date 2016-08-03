@@ -10,7 +10,6 @@ for key, value in vars(Colors).iteritems():
 class UserInfo():
     def __init__(self):
         self.registeredDate = time.localtime(time.time())
-        self.LastGathered = time.localtime(time.time())
         self.LastBuild = time.localtime(time.time())
         self.LastRecruit = time.localtime(time.time())
         self.buildingsBuildToday = 0
@@ -25,7 +24,7 @@ class UserInfo():
         if self.LastBuild.tm_year < actualTime.tm_year or \
             self.LastBuild.tm_mon < actualTime.tm_mon or \
             self.LastBuild.tm_mday < actualTime.tm_mday or \
-            self.LastBuild.tm_hour + 6 < actualTime.tm_hour:
+            self.LastBuild.tm_hour + 5 < actualTime.tm_hour:
             self.LastBuild = actualTime
             self.buildingsBuildToday = 0
     
@@ -34,16 +33,6 @@ class UserInfo():
         if self.LastRecruit.tm_year < actualTime.tm_year or \
             self.LastRecruit.tm_mon < actualTime.tm_mon or \
             self.LastRecruit.tm_mday < actualTime.tm_mday or \
-            self.LastBuild.tm_hour + 6 < actualTime.tm_hour:
+            self.LastRecruit.tm_hour + 5 < actualTime.tm_hour:
             self.LastRecruit = actualTime
             self.unitsRecruitedToday = 0
-    
-    def CheckLastGetProduction(self):
-        actualTime = time.localtime(time.time())
-        if self.LastGathered.tm_year < actualTime.tm_year or \
-            self.LastGathered.tm_mon < actualTime.tm_mon or \
-            self.LastGathered.tm_mday < actualTime.tm_mday or \
-            self.LastGathered.tm_hour + 6 < actualTime.tm_hour:
-            self.LastGathered = actualTime
-            return True
-        return False

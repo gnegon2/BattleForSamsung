@@ -4,6 +4,7 @@ from Resources import Resources
 from Statistics import Statistics
 from copy import copy
 import Utility
+import inspect
 
 def CommandToUnit(command):
     if command == UnitsCommands._1_0_PEASANT:
@@ -26,8 +27,9 @@ def CommandToUnit(command):
         return Empty
     
 def ShowInfo(player, unit):
-    Utility.SendMsg(player, Colors.COLOR_AZURE + unit.__name__ + ": \n")
-    Utility.SendMsg(player, unit.ExtraInfo())
+    if inspect.isclass(unit):
+        Utility.SendMsg(player, Colors.COLOR_AZURE + unit.__name__ + ": \n")
+        Utility.SendMsg(player, unit.ExtraInfo())
     Utility.SendMsg(player, Colors.COLOR_ORANGE + "Cost: \n")
     for iType, iAmount in unit.cost.iteritems():
         if iAmount > 0:
@@ -67,7 +69,7 @@ class Peasant(Unit):
         
     @staticmethod
     def ExtraInfo():
-        return "Peasant is the stupid man with fork.\n"
+        return Colors.COLOR_GREEN + "Peasant is the stupid man with fork.\n"
 
 class Archer(Unit):
     field = "2"
@@ -83,7 +85,7 @@ class Archer(Unit):
     
     @staticmethod
     def ExtraInfo():
-        return "Archer can attack on distance.\n"
+        return Colors.COLOR_GREEN +"Archer can attack on distance.\n"
     
 class Swordman(Unit):
     field = "3"
@@ -99,7 +101,7 @@ class Swordman(Unit):
     
     @staticmethod
     def ExtraInfo():
-        return "Swordman is a strong unit in armor.\n"
+        return Colors.COLOR_GREEN + "Swordman is a strong unit in armor.\n"
     
 class Pikeman(Unit):
     field = "4"
@@ -115,7 +117,7 @@ class Pikeman(Unit):
     
     @staticmethod
     def ExtraInfo():
-        return "Pikeman is best against horseman.\n"
+        return Colors.COLOR_GREEN + "Pikeman is best against horseman.\n"
      
 class Crossbowman(Unit):
     field = "5"
@@ -131,7 +133,7 @@ class Crossbowman(Unit):
         
     @staticmethod
     def ExtraInfo():
-        return "Crossbowman is a very strong range unit.\n"
+        return Colors.COLOR_GREEN + "Crossbowman is a very strong range unit.\n"
     
 class Horseman(Unit):
     field = "6"
@@ -147,7 +149,7 @@ class Horseman(Unit):
     
     @staticmethod
     def ExtraInfo():
-        return "Horseman is a very fast unit.\n"
+        return Colors.COLOR_GREEN + "Horseman is a very fast unit.\n"
     
 class Catapult(Unit):
     field = "7"
@@ -163,7 +165,7 @@ class Catapult(Unit):
         
     @staticmethod
     def ExtraInfo():
-        return "Catapult can attack at very high distance.\n"
+        return Colors.COLOR_GREEN + "Catapult can attack at very high distance.\n"
     
 class Cannon(Unit):
     field = "8"
@@ -179,4 +181,4 @@ class Cannon(Unit):
         
     @staticmethod
     def ExtraInfo():
-        return "Cannon is the most powerfull unit.\n"
+        return Colors.COLOR_GREEN + "Cannon is the most powerfull unit.\n"

@@ -8,11 +8,13 @@ import State
 import Control
 import Utility 
 import Commands
+import Buildings
 
 def InitGame():
     Log.Init()
     WorldMap.LoadMap()
     WorldMap.InitForbiddenPlaces()
+    Buildings.InitFortressLevels()
 
 def MainMenu(player):
     Log.Save("New player enter main menu!\n")

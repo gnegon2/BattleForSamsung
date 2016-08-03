@@ -132,8 +132,11 @@ class Client:
                     sock.sendall(pass_msg)
                 elif data.find(Control.CTRL_INPUT) != -1:
                     msg = prompt(': ', history=Console.history, enable_history_search=True, completer=Console.commands_completer)
-                    Console.history.append(msg)
-                    sock.sendall(msg)
+                    if msg:  
+                        Console.history.append(msg)
+                        sock.sendall(msg)
+                    else:
+                        sock.sendall("NEW_LINE")
                 elif data.find(Control.CTRL_MENU) != -1:
                     Console.update_complete(data)
                     sock.sendall(Client.ACK)
