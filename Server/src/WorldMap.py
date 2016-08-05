@@ -2,6 +2,9 @@ from Colors import Colors
 from Commands import WorldMapCommands
 from Commands import MainCommands
 from Pos import Pos
+from Data import mainData
+from Data import dbLock
+from Map import mainMap as Map
 import Attack
 import Config
 import re
@@ -11,7 +14,6 @@ import Utility
 import State
 import Control
 import Log
-import Map
 import Geo
 import Scout
 
@@ -26,7 +28,14 @@ def LoadMap():
         row = []; y
         for x in range(Map.x_size * Map.end):
             row.append(Buildings.Empty()); x
-        Map.fields.append(row)                       
+        Map.fields.append(row) 
+    with dbLock:   
+        mainData.map = Map
+        
+def LoadMapFromDb():
+    Log.Save("LoadMapFromDb.\n")
+    with dbLock:   
+        Map.Load(mainData.map)                   
         
 def InitForbiddenPlaces():
     Log.Save("InitForbiddenPlaces.\n")
@@ -148,12 +157,12 @@ def ShowMap(player):
             mapMsg += " "
             if Config.randomColors:
                 if field is not None:
-                    mapMsg += field.owner.info.color + str(field.level)
+                    mapMsg += field.owner_info.color + str(field.level)
                 else:
                     mapMsg += Buildings.Empty.color + Buildings.Empty.field
             else:
                 if field is not None:
-                    if field.owner == player:
+                    if field.owner == player.username:
                         mapMsg += Colors.COLOR_GREEN 
                     else:
                         mapMsg += Colors.COLOR_RED
@@ -180,7 +189,7 @@ def EnterFortress(player, wy, wx):
     if fort is not None:
         player.wy = wy
         player.wx = wx
-        if fort.owner.username == player.username:
+        if fort.owner == player.username:
             player.state = State.LOCAL_MAP
         else:
             Scout.ScoutingMode(player)
@@ -191,14 +200,14 @@ def GetProduction(player):
     for wy in range(Map.y_size):
         for wx in range(Map.x_size):
             fort = Map.GetFort(wy, wx)
-            if isinstance(fort, Buildings.Fortress) and fort.owner.username == player.username:
+            if isinstance(fort, Buildings.Fortress) and fort.owner == player.username:
                 LocalMap.GetProduction(player, wy, wx)  
     Utility.SendMsg(player, Colors.COLOR_GREEN + "All production gathered!\n")   
         
 def AttackFortress(player, wy ,wx):
     fort = Map.GetFort(wy, wx)
     if fort is not None:
-        if fort.owner != player:
+        if fort.owner != player.username:
             player.wy = wy
             player.wx = wx   
             if Attack.AttackFortress(player, wy, wx):
@@ -211,7 +220,7 @@ def AttackFortress(player, wy ,wx):
 def RepairFortress(player, wy ,wx):
     fort = Map.GetFort(wy, wx)
     if fort is not None:
-        if fort.owner == player:
+        if fort.owner == player.username:
             player.wy = wy
             player.wx = wx 
             if not LocalMap.RepairFortress(player, wy, wx):
@@ -227,7 +236,7 @@ def MoveArmy(player, wy, wx, geo):
     Log.Save(player.username + " try to move army\n")
     fort = Map.GetFort(wy, wx)
     if fort is not None:
-        if fort.owner == player:
+        if fort.owner == player.username:
             if geo == Geo.NORTH:
                 dest_fort = Map.GetFort(wy-1, wx)
             elif geo == Geo.SOUTH:
@@ -237,7 +246,7 @@ def MoveArmy(player, wy, wx, geo):
             elif geo == Geo.WEST:
                 dest_fort = Map.GetFort(wy, wx-1)
             if dest_fort is not None:
-                if dest_fort.owner == player:
+                if dest_fort.owner == player.username:
                     LocalMap.MoveUnits(player, wy, wx, geo)
                 else:
                     Utility.SendMsg(player, Colors.COLOR_RED + "Can't move units into enemy fortress!\n")

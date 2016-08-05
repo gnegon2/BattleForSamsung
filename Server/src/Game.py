@@ -1,6 +1,7 @@
 from Commands import MenuCommands, MainCommands, LocalMapCommands, WorldMapCommands
 from Colors import Colors
-import Map
+from Database import Database
+from Map import mainMap as Map
 import Log
 import WorldMap
 import LocalMap
@@ -9,12 +10,20 @@ import Control
 import Utility 
 import Commands
 import Buildings
+import Config
 
 def InitGame():
     Log.Init()
-    WorldMap.LoadMap()
-    WorldMap.InitForbiddenPlaces()
-    Buildings.InitFortressLevels()
+    if not Config.loadDatabase:
+        Database.InitDatabase()
+        WorldMap.LoadMap()
+        WorldMap.InitForbiddenPlaces()
+        Buildings.InitFortressLevels()
+    else:
+        Database.LoadDatabase()
+        WorldMap.LoadMapFromDb()
+        Buildings.InitFortressLevels()
+    Database.DatabaseSaver()
 
 def MainMenu(player):
     Log.Save("New player enter main menu!\n")
@@ -127,7 +136,7 @@ def LocalMapMenu(player):
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         Log.Save(player.username + " enter command: " + command + "\n")
         fort = Map.GetFort(player.wy, player.wx) 
-        if fort is not None and fort.owner.username == player.username:
+        if fort is not None and fort.owner == player.username:
             LocalMap.ExecuteCommand(player, command)
         else:
             player.state = State.WORLD_MAP

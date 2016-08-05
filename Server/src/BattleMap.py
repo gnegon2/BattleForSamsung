@@ -1,9 +1,9 @@
+from Map import mainMap as Map
 from Colors import Colors
 from Pos import Pos
 import Utility
 import Log
 import Geo
-import Map
 
 class BattleMap():
        

@@ -1,3 +1,9 @@
+global databasePath
+databasePath = "database.db"
+
+global loadDatabase
+loadDatabase = False
+
 global logPath
 logPath = "log.txt"
 

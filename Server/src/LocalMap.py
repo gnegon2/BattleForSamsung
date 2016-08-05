@@ -5,6 +5,7 @@ from Commands import LocalMapCommands
 from Commands import ActionCommands
 from Commands import UnitsCommands
 from Resources import Resources
+from Map import mainMap as Map
 from Pos import Pos
 import Log
 import Buildings
@@ -14,7 +15,6 @@ import Control
 import State
 import Config
 import re
-import Map
 import Statistics
 import Geo
 from Buildings import Fortress
@@ -107,7 +107,7 @@ def BuildingMenu(player):
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         Log.Save(player.username + " enter command: " + command + "\n")
         fort = Map.GetFort(player.wy, player.wx) 
-        if fort is not None and fort.owner.username == player.username:
+        if fort is not None and fort.owner == player.username:
             # MainCommands >>>
             if command == MainCommands._0_0_SHOW_MAP:
                 ShowMap(player)
@@ -146,7 +146,7 @@ def BuildingActionMenu(player, building):
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         Log.Save(player.username + " enter command: " + command + "\n")
         fort = Map.GetFort(player.wy, player.wx) 
-        if fort is not None and fort.owner.username == player.username:
+        if fort is not None and fort.owner == player.username:
             # MainCommands >>>
             if command == MainCommands._0_0_SHOW_MAP:
                 ShowMap(player)
@@ -225,7 +225,7 @@ def UnitsMenu(player):
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         Log.Save(player.username + " enter command: " + command + "\n")
         fort = Map.GetFort(player.wy, player.wx) 
-        if fort is not None and fort.owner.username == player.username:
+        if fort is not None and fort.owner == player.username:
             # MainCommands >>>
             if command == MainCommands._0_0_SHOW_MAP:
                 ShowMap(player)
@@ -267,7 +267,7 @@ def UnitsActionMenu(player, unit):
         command = Utility.SendMsg(player, Control.CTRL_INPUT)
         Log.Save(player.username + " enter command: " + command + "\n")
         fort = Map.GetFort(player.wy, player.wx) 
-        if fort is not None and fort.owner.username == player.username:
+        if fort is not None and fort.owner == player.username:
             # MainCommands >>>
             if command == MainCommands._0_0_SHOW_MAP:
                 ShowMap(player)
@@ -442,7 +442,7 @@ def OvertakeFortress(player, wy, wx):
         for x in range(Map.end):
             pos = Pos(wy, wx, y, x)
             entity = Map.Get(pos)
-            if entity.owner.username != player.username:
+            if entity.owner != player.username:
                 if isinstance(entity, Units.Unit):
                     Map.SetEmpty(pos)
                 elif isinstance(entity, Buildings.Building):

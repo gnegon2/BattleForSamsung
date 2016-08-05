@@ -1,9 +1,9 @@
 from Commands import ScoutingCommands
 from Commands import MainCommands
 from Resources import Resources
+from Map import mainMap as Map
 from Colors import Colors
 from Pos import Pos
-import Map
 import Utility
 import Commands
 import State
@@ -219,7 +219,7 @@ def ScoutingMode(player):
         # MainCommands <<<
         elif command == ScoutingCommands._0_0_SHOW_INFO:
             fort = Map.GetFort(player.wy, player.wx)  
-            Utility.SendMsg(player, Colors.COLOR_BLOOD + fort.owner.username + " own this fortress!\n")
+            Utility.SendMsg(player, Colors.COLOR_BLOOD + fort.owner + " own this fortress!\n")
             Utility.SendMsg(player, ShowCost())
         elif command == ScoutingCommands._1_0_SCOUT_ENTIRE_MAP:
             if player.Pay(Cost.entire_cost, 100):

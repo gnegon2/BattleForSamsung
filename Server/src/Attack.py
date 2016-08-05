@@ -1,3 +1,4 @@
+from Map import mainMap as Map
 from Colors import Colors
 from Battle import Battle
 from Pos import Pos
@@ -6,7 +7,6 @@ import Utility
 import Units
 import Attack
 import Geo
-import Map
 
 def AttackFortress(player, wy, wx):
     Log.Save(player.username + " attack fortress on field: " + str(wy) + " " + str(wx) + "\n")
@@ -44,16 +44,16 @@ def CheckNearFortress(player, wy, wx):
     fortress = {}
     fortress[Geo.NORTH] = fortress[Geo.SOUTH] = fortress[Geo.EAST] = fortress[Geo.WEST] = False
     fort = Map.GetFort(wy - 1, wx)
-    if fort is not None and fort.owner.username == player.username:
+    if fort is not None and fort.owner == player.username:
         fortress[Geo.NORTH] = True;
     fort = Map.GetFort(wy + 1, wx)
-    if fort is not None and fort.owner.username == player.username:
+    if fort is not None and fort.owner == player.username:
         fortress[Geo.SOUTH] = True;
     fort = Map.GetFort(wy, wx + 1)
-    if fort is not None and fort.owner.username == player.username:
+    if fort is not None and fort.owner == player.username:
         fortress[Geo.EAST] = True;
     fort = Map.GetFort(wy, wx - 1)
-    if fort is not None and fort.owner.username == player.username:
+    if fort is not None and fort.owner == player.username:
         fortress[Geo.WEST] = True;
     return fortress
 

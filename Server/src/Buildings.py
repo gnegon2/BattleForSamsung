@@ -103,6 +103,9 @@ def ShowInfo(player, building):
     if inspect.isclass(building):
         Utility.SendMsg(player, Colors.COLOR_AZURE + building.__name__ + ": \n")
         Utility.SendMsg(player, building.ExtraInfo())
+    else:
+        Utility.SendMsg(player, Colors.COLOR_AZURE + building.__class__.__name__ + ": \n")
+        Utility.SendMsg(player, building.__class__.ExtraInfo())
     Utility.SendMsg(player, Colors.COLOR_ORANGE + "Cost: \n")
     for iType, iAmount in building.cost.iteritems():
         if iAmount > 0:
@@ -135,8 +138,10 @@ def GetProduction(resource, building):
 class Building(object):
     def __new__(cls, *args, **kwargs):
         obj = object.__new__(cls, *args, **kwargs)
-        obj.owner = args[0]
-        obj.LastGathered = time.localtime(time.time() - 60*60*6)
+        if len(args) > 0:
+            obj.owner = args[0].username
+            obj.owner_info = args[0].info
+            obj.LastGathered = time.localtime(time.time() - 60*60*6)
         return obj
 
 class Empty():
@@ -179,10 +184,10 @@ class Fortress(Building):
         self.production = self.__class__.production
         
         self.army_production = self.__class__.army_production
-        self.owner.info.maxNumberOfUnits += self.army_production
+        self.owner_info.maxNumberOfUnits += self.army_production
         
     def __del__(self):
-        self.owner.info.maxNumberOfUnits -= self.army_production
+        self.owner_info.maxNumberOfUnits -= self.army_production
     
     @staticmethod
     def ExtraInfo():
@@ -209,10 +214,10 @@ class House(Building):
         self.statistics = copy(self.__class__.statistics)
         
         self.army_production = self.__class__.army_production
-        self.owner.info.maxNumberOfUnits += self.army_production
+        self.owner_info.maxNumberOfUnits += self.army_production
     
     def __del__(self):
-        self.owner.info.maxNumberOfUnits -= self.army_production   
+        self.owner_info.maxNumberOfUnits -= self.army_production   
     
     @staticmethod
     def ExtraInfo():

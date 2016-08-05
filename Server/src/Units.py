@@ -30,6 +30,9 @@ def ShowInfo(player, unit):
     if inspect.isclass(unit):
         Utility.SendMsg(player, Colors.COLOR_AZURE + unit.__name__ + ": \n")
         Utility.SendMsg(player, unit.ExtraInfo())
+    else:
+        Utility.SendMsg(player, Colors.COLOR_AZURE + unit.__class__.__name__ + ": \n")
+        Utility.SendMsg(player, unit.__class__.ExtraInfo())
     Utility.SendMsg(player, Colors.COLOR_ORANGE + "Cost: \n")
     for iType, iAmount in unit.cost.iteritems():
         if iAmount > 0:
@@ -46,14 +49,14 @@ class Empty():
 class Unit(object): 
     def __new__(cls, *args, **kwargs):
         obj = object.__new__(cls, *args, **kwargs)
-        obj.owner = args[0]
-        obj.owner.info.numberOfUnits += 1
-        print "obj.owner.info.numberOfUnits=" + str(obj.owner.info.numberOfUnits)
+        if len(args) > 0:
+            obj.owner = args[0].username
+            obj.owner_info = args[0].info
+            obj.owner_info.numberOfUnits += 1
         return obj
     
     def __del__(self):
-        self.owner.info.numberOfUnits -= 1
-        print "del obj.owner.info.numberOfUnits=" + str(self.owner.info.numberOfUnits)
+        self.owner_info.numberOfUnits -= 1
         
 class Peasant(Unit):
     field = "1"

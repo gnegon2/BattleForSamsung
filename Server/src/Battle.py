@@ -1,3 +1,4 @@
+from Map import mainMap as Map
 from BattleMap import BattleMap
 from Commands import BattleCommands
 from Colors import Colors
@@ -9,7 +10,6 @@ import Control
 import Units
 import Statistics
 import Geo
-import Map
 import Commands
 import random
 
@@ -129,7 +129,7 @@ class Battle():
     def MoveUnit(self, wy, wx,y, x):
         src_pos = Pos(wy, wx, y, x)
         unit = Map.Get(src_pos)
-        if isinstance(unit, Units.Unit) and unit.owner.username == self.attacker.username and unit.move > 0:
+        if isinstance(unit, Units.Unit) and unit.owner == self.attacker.username and unit.move > 0:
             if unit.army == Geo.NORTH:
                 ny, nx = y+1, x
             elif unit.army == Geo.SOUTH:
@@ -149,7 +149,7 @@ class Battle():
     def ChangeGeo(self, wy, wx, y, x):
         src_pos = Pos(wy, wx, y, x)
         unit = Map.Get(src_pos)
-        if isinstance(unit, Units.Unit) and unit.owner.username == self.attacker.username:
+        if isinstance(unit, Units.Unit) and unit.owner == self.attacker.username:
             if x == Map.half or x == Map.half - 1:
                 if y < Map.half:
                     unit.army = Geo.NORTH
@@ -204,7 +204,7 @@ class Battle():
                     entity.move = 0
                     if enemy_entity.statistics[Statistics.HitPoints] <= 0:
                         if self.log:
-                            if entity.owner.username == self.attacker.username:
+                            if entity.owner == self.attacker.username:
                                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Entity " + enemy_entity.__class__.__name__ + " destroyed!\n")
                             else:
                                 Utility.SendMsg(player, Colors.COLOR_RED + "Your unit " + enemy_entity.__class__.__name__ + " destroyed!\n")
@@ -261,7 +261,7 @@ class Battle():
         enemy_unit.statistics[Statistics.HitPoints] -= damage
         print "enemy_unit.hp =",enemy_unit.statistics[Statistics.HitPoints]
         if self.log:
-            if attacker_unit.owner.username == self.attacker.username:
+            if attacker_unit.owner == self.attacker.username:
                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Your " + attacker_unit.__class__.__name__ + " attack " + enemy_unit.__class__.__name__ + " taking " + str(damage) + " damage!\n")
             else:
                 Utility.SendMsg(player, Colors.COLOR_RED + "Enemy unit " + attacker_unit.__class__.__name__ + " attack your " +  enemy_unit.__class__.__name__ + " taking " + str(damage) + " damage!\n")
@@ -306,13 +306,13 @@ class Battle():
         dst_pos = Pos(wy, wx, y, x)
         enemy_object = Map.Get(dst_pos)
         if isinstance(enemy_object, Units.Unit) or isinstance(enemy_object, Buildings.Building):
-            if enemy_object.owner.username != unit.owner.username:
+            if enemy_object.owner != unit.owner:
                 return True, dst_pos 
         return False, 0 
     
     def CheckUnit(self, wy, wx, y, x):
         unit = Map.Get(Pos(wy, wx, y, x))
-        if isinstance(unit, Units.Unit) and self.attacker.username == unit.owner.username:
+        if isinstance(unit, Units.Unit) and self.attacker.username == unit.owner:
             return True
         return False
     
