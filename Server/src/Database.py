@@ -30,8 +30,7 @@ class Database():
                    Database.lastSave.tm_mon < actualTime.tm_mon or \
                    Database.lastSave.tm_mday < actualTime.tm_mday or \
                    Database.lastSave.tm_hour < actualTime.tm_hour or \
-                   Database.lastSave.tm_min < actualTime.tm_min or \
-                   Database.lastSave.tm_sec + 2 < actualTime.tm_sec:
+                   Database.lastSave.tm_min + 4 < actualTime.tm_min:
                     with dbLock:
                         Database.Save(Data.mainData)
                     Database.lastSave = actualTime

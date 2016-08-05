@@ -457,9 +457,9 @@ def UpgradeFortress(player):
     fort = Map.GetFort(player.wy, player.wx)
     level = fort.level
     if level <= len(Fortress.production_per_level):
-        cost = Buildings.Fortress.cost_per_level[level-1]
+        cost = Buildings.Fortress.cost_per_level[level]
         if player.Pay(cost, 100.0):
-            Map.ChangeFortLevel(player.wy, player.wx, 1)
+            Map.ChangeFortLevel(player.wy, player.wx, level)
             Utility.SendMsg(player, Colors.COLOR_GREEN + "Successfully upgraded fortress!\n")
     else:
         Utility.SendMsg(player, Colors.COLOR_GREEN + "Fortress maximally upgraded!\n")

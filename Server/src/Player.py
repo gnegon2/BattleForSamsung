@@ -25,7 +25,7 @@ class Player():
         
     def InitResources(self):
         self.resources = Resources()
-        self.resources.Init(8000, 250, 250, 30)
+        self.resources.Init(1000, 25, 25, 3)
         with dbLock:
             mainData.resources.append((self.username, self.resources))
         

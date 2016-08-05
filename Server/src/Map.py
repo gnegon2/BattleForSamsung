@@ -52,15 +52,15 @@ class Map():
             
     def UpgradeFortress(self, fort, level):
         if isinstance(fort, Buildings.Fortress):
-            fort.level += level
-            production = Buildings.Fortress.production_per_level[level-1]
+            fort.level = level + 1
+            production = Buildings.Fortress.production_per_level[level]
             for resType, resAmount in production.iteritems():
                 if resAmount > 0:
-                    fort.production[resType] += resAmount
-            statistics = Buildings.Fortress.statistics_per_level[level-1]
+                    fort.production[resType] = resAmount
+            statistics = Buildings.Fortress.statistics_per_level[level]
             for statType, statAmount in statistics.iteritems():
                 if statAmount > 0:
-                    fort.statistics[statType] += statAmount
+                    fort.statistics[statType] = statAmount
         
     def Get(self, pos):
         return weakref.proxy(mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x])
