@@ -1,3 +1,4 @@
+from Database import Database
 from Pos import Pos
 import Config
 import Buildings
@@ -61,23 +62,28 @@ class Map():
             for statType, statAmount in statistics.iteritems():
                 if statAmount > 0:
                     fort.statistics[statType] = statAmount
+            Database.SaveDatabase()
         
     def Get(self, pos):
         return weakref.proxy(mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x])
     
     def SetEmpty(self, pos):
         mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x] = Buildings.Empty()
+        Database.SaveDatabase()
     
     def SetForbidden(self, pos):
         mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x] = Buildings.Forbidden()
+        Database.SaveDatabase()
     
     def Set(self, player, instance, pos):
         mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x] = instance(player)
+        Database.SaveDatabase()
         
     def Swap(self, pos1, pos2):
         field = mainMap.fields[pos2.wy*self.end+pos2.y][pos2.wx*self.end+pos2.x]
         mainMap.fields[pos2.wy*self.end+pos2.y][pos2.wx*self.end+pos2.x] = mainMap.fields[pos1.wy*self.end+pos1.y][pos1.wx*self.end+pos1.x]
         mainMap.fields[pos1.wy*self.end+pos1.y][pos1.wx*self.end+pos1.x] = field
+        Database.SaveDatabase()
 
 mainMap = Map()
 

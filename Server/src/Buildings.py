@@ -211,7 +211,7 @@ class House(Building):
     color = Colors.COLOR_GREEN
     
     cost = Resources()
-    cost.Init(50, 2, 2)
+    cost.Init(60, 3, 3)
     
     statistics = Statistics()
     statistics.Init(120, 4)
@@ -240,7 +240,7 @@ class Bank(Building):
     color = Colors.COLOR_GOLD
     
     cost = Resources()
-    cost.Init(40, 5, 5)
+    cost.Init(50, 6, 6)
     
     production = Resources()
     production.Init(60)
@@ -265,7 +265,7 @@ class SawMill(Building):
     color = Colors.COLOR_WOOD
     
     cost = Resources()
-    cost.Init(40, 0, 5)
+    cost.Init(60, 0, 6)
     
     production = Resources()
     production.Init(0, 5)
@@ -290,7 +290,7 @@ class Mine(Building):
     color = Colors.COLOR_STEEL
     
     cost = Resources()
-    cost.Init(60, 4)
+    cost.Init(60, 6)
     
     production = Resources()
     production.Init(0, 0, 5)

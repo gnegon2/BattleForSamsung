@@ -18,12 +18,10 @@ def InitGame():
         Database.InitDatabase()
         WorldMap.LoadMap()
         WorldMap.InitForbiddenPlaces()
-        Buildings.InitFortressLevels()
     else:
         Database.LoadDatabase()
         WorldMap.LoadMapFromDb()
-        Buildings.InitFortressLevels()
-    Database.DatabaseSaver()
+    Buildings.InitFortressLevels()
 
 def MainMenu(player):
     Log.Save("New player enter main menu!\n")

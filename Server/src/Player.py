@@ -3,6 +3,7 @@ from UserInfo import UserInfo
 from Colors import Colors
 from Data import mainData
 from Data import dbLock
+from Database import Database
 import Utility
 import State
 
@@ -16,6 +17,7 @@ class Player():
         self.info = UserInfo()
         with dbLock:
             mainData.users_info.append((self.username, self.info))
+            Database.SaveDatabase()
     
     def LoadUserInfo(self):
         with dbLock:
@@ -28,6 +30,7 @@ class Player():
         self.resources.Init(1000, 25, 25, 3)
         with dbLock:
             mainData.resources.append((self.username, self.resources))
+            Database.SaveDatabase()
         
     def LoadResources(self):
         with dbLock:

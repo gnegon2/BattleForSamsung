@@ -295,7 +295,7 @@ def UnitsActionMenu(player, unit):
 def RecruitUnit(player, unit, y, x):
     Log.Save(player.username + " try to recruit unit\n")
     player.info.CheckLastRecruit()
-    if player.info.numberOfUnits <= player.info.maxNumberOfUnits:
+    if player.info.numberOfUnits < player.info.maxNumberOfUnits:
         if player.info.unitsRecruitedToday < Config.maxUnitsPerDay or Config.maxUnitsPerDay == 0:
             pos = Pos(player.wy, player.wx, y, x)
             field = Map.Get(pos)
@@ -335,16 +335,16 @@ def Repair(player, y, x):
         hp_max = entity.__class__.statistics[Statistics.HitPoints]
         hp_res = entity.statistics[Statistics.HitPoints]
         percent = int((hp_max - hp_res / float(hp_max)) * 100)  
-        if percent == 100:
+        if not percent == 0:
             if player.Pay(entity.cost, percent):
                 Utility.SendMsg(player, Colors.COLOR_GREEN + entity.__class__.__name__ + " succesfully repaired!\n")
                 return True
             else:
                 Utility.SendMsg(player, Colors.COLOR_RED + "Not enough resources!\n")
-                return True
+                return False
     return False
 
-def RepairFortress(player, wy, wx):
+def RepairFortress(player):
     repaired = False
     for y in range(Map.end):
         for x in range(Map.end):

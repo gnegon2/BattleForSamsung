@@ -1,6 +1,7 @@
 from Colors import Colors
 from Commands import WorldMapCommands
 from Commands import MainCommands
+from Database import Database
 from Pos import Pos
 from Data import mainData
 from Data import dbLock
@@ -31,11 +32,12 @@ def LoadMap():
         Map.fields.append(row) 
     with dbLock:   
         mainData.map = Map
+        Database.SaveDatabase()
         
 def LoadMapFromDb():
     Log.Save("LoadMapFromDb.\n")
     with dbLock:   
-        Map.Load(mainData.map)                   
+        Map.Load(mainData.map)                
         
 def InitForbiddenPlaces():
     Log.Save("InitForbiddenPlaces.\n")
@@ -223,7 +225,7 @@ def RepairFortress(player, wy ,wx):
         if fort.owner == player.username:
             player.wy = wy
             player.wx = wx 
-            if not LocalMap.RepairFortress(player, wy, wx):
+            if not LocalMap.RepairFortress(player):
                 Utility.SendMsg(player, Colors.COLOR_RED + "Nothing to repair!\n")
             else:
                 Log.Save(player.username + " repair fortress!\n")

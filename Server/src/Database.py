@@ -1,4 +1,4 @@
-from Buildings import * # must be
+#from Buildings import * # must be
 from Data import dbLock
 import Data
 import pickle
@@ -6,39 +6,22 @@ import Config
 import Log
 
 class Database():
-    lastSave = 0
-    run = True
     
     @staticmethod
     def InitDatabase():
         Log.Save("Init database.\n")
         Data.mainData.Init()
-        Database.lastSave = time.localtime(time.time())
         
     @staticmethod
     def LoadDatabase(): 
         Log.Save("Load database.\n") 
         Data.mainData.Load(Database.Load()) 
-        Database.lastSave = time.localtime(time.time())
     
     @staticmethod
-    def DatabaseSaver():
-        try:
-            while Database.run:
-                actualTime = time.localtime(time.time())
-                if Database.lastSave.tm_year < actualTime.tm_year or \
-                   Database.lastSave.tm_mon < actualTime.tm_mon or \
-                   Database.lastSave.tm_mday < actualTime.tm_mday or \
-                   Database.lastSave.tm_hour < actualTime.tm_hour or \
-                   Database.lastSave.tm_min + 4 < actualTime.tm_min:
-                    with dbLock:
-                        Database.Save(Data.mainData)
-                    Database.lastSave = actualTime
-                    Log.Save("Database saved.\n")
-        except Exception as inst:
-            Log.Save(inst.__str__() + "\n")
-            Log.Save("Database saving crashed.\n")
-        Log.Save("Stop saving database.\n")
+    def SaveDatabase():
+        with dbLock:
+            Database.Save(Data.mainData)
+            Log.Save("Database saved.\n")
                 
     @staticmethod           
     def Save(obj):

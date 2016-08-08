@@ -1,35 +1,19 @@
 from Player import Player
-import threading
 import socket
 import thread
 import Config
 import State
 import Log
 import Game
-from Database import Database
-
-#import BattleTest
-   
-class DatabaseThread (threading.Thread):
-    def __init__(self):
-        threading.Thread.__init__(self)
-    def run(self):
-        Game.InitGame()
 
 def Session(connection, client_address):
     Log.Save("New player connected!\n") 
     try:
         player = Player(connection)
-        #initialize = False
         while player.state != State.EXITING:
             if player.state == State.INIT:
                 Game.MainMenu(player)
             if player.loggedIn:
-                #===============================================================
-                # if not initialize:
-                #     BattleTest.Init(player)
-                #     initialize = True
-                #===============================================================
                 if player.state == State.WORLD_MAP:
                     Game.WorldMapMenu(player)
                 elif player.state == State.LOCAL_MAP:
@@ -44,8 +28,7 @@ def Session(connection, client_address):
         Log.Save("Server close connection!\n")
      
 def Start():
-    databaseThread = DatabaseThread()
-    databaseThread.start()
+    Game.InitGame()
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server_address = ('localhost', Config.port)
     sock.bind(server_address)
@@ -59,9 +42,7 @@ def Start():
             thread.start_new_thread( Session, (connection, client_address, ) )
         except:
             Log.Save("Error. Stopping Server.")
-            Database.run = False
             break
-    databaseThread.join()
     sock.close()  
          
 Start()
