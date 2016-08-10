@@ -40,50 +40,53 @@ class Map():
         self.Set(player, Buildings.Fortress, Pos(wy, wx, self.half - 1, self.half))
         self.Set(player, Buildings.Fortress, Pos(wy, wx, self.half, self.half - 1))
         self.Set(player, Buildings.Fortress, Pos(wy, wx, self.half, self.half))
+        Database.SaveDatabase()
         
-    def ChangeFortLevel(self, wy, wx, level):
+    def ChangeFortLevel(self, wy, wx, next_level):
         fort = self.Get(Pos(wy, wx, self.half-1, self.half-1))
-        self.UpgradeFortress(fort, level) 
+        self.UpgradeFortress(fort, next_level) 
         fort = self.Get(Pos(wy, wx, self.half, self.half-1))
-        self.UpgradeFortress(fort, level)
+        self.UpgradeFortress(fort, next_level)
         fort = self.Get(Pos(wy, wx, self.half-1, self.half))
-        self.UpgradeFortress(fort, level)
+        self.UpgradeFortress(fort, next_level)
         fort = self.Get(Pos(wy, wx, self.half, self.half))
-        self.UpgradeFortress(fort, level)
+        self.UpgradeFortress(fort, next_level)
+        Database.SaveDatabase()
             
-    def UpgradeFortress(self, fort, level):
+    def UpgradeFortress(self, fort, next_level):
         if isinstance(fort, Buildings.Fortress):
-            fort.level = level + 1
-            production = Buildings.Fortress.production_per_level[level]
+            fort.level = next_level
+            production = Buildings.Fortress.production_per_level[next_level]
             for resType, resAmount in production.iteritems():
                 if resAmount > 0:
                     fort.production[resType] = resAmount
-            statistics = Buildings.Fortress.statistics_per_level[level]
+            statistics = Buildings.Fortress.statistics_per_level[next_level]
             for statType, statAmount in statistics.iteritems():
                 if statAmount > 0:
                     fort.statistics[statType] = statAmount
-            Database.SaveDatabase()
         
     def Get(self, pos):
         return weakref.proxy(mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x])
     
-    def SetEmpty(self, pos):
+    def SetEmpty(self, pos, save=False):
         mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x] = Buildings.Empty()
-        Database.SaveDatabase()
+        if save:
+            Database.SaveDatabase()
     
     def SetForbidden(self, pos):
         mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x] = Buildings.Forbidden()
-        Database.SaveDatabase()
     
-    def Set(self, player, instance, pos):
+    def Set(self, player, instance, pos, save=False):
         mainMap.fields[pos.wy*self.end+pos.y][pos.wx*self.end+pos.x] = instance(player)
-        Database.SaveDatabase()
+        if save:
+            Database.SaveDatabase()
         
-    def Swap(self, pos1, pos2):
+    def Swap(self, pos1, pos2, save=False):
         field = mainMap.fields[pos2.wy*self.end+pos2.y][pos2.wx*self.end+pos2.x]
         mainMap.fields[pos2.wy*self.end+pos2.y][pos2.wx*self.end+pos2.x] = mainMap.fields[pos1.wy*self.end+pos1.y][pos1.wx*self.end+pos1.x]
         mainMap.fields[pos1.wy*self.end+pos1.y][pos1.wx*self.end+pos1.x] = field
-        Database.SaveDatabase()
+        if save:
+            Database.SaveDatabase()
 
 mainMap = Map()
 

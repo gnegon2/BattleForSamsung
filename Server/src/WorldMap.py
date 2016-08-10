@@ -1,10 +1,8 @@
 from Colors import Colors
 from Commands import WorldMapCommands
 from Commands import MainCommands
-from Database import Database
 from Pos import Pos
 from Data import mainData
-from Data import dbLock
 from Map import mainMap as Map
 import Attack
 import Config
@@ -17,6 +15,7 @@ import Control
 import Log
 import Geo
 import Scout
+from Database import Database
 
 def LoadMap():
     Log.Save("LoadMap.\n")
@@ -29,15 +28,11 @@ def LoadMap():
         row = []; y
         for x in range(Map.x_size * Map.end):
             row.append(Buildings.Empty()); x
-        Map.fields.append(row) 
-    with dbLock:   
-        mainData.map = Map
-        Database.SaveDatabase()
+        Map.fields.append(row)  
         
 def LoadMapFromDb():
-    Log.Save("LoadMapFromDb.\n")
-    with dbLock:   
-        Map.Load(mainData.map)                
+    Log.Save("LoadMapFromDb.\n") 
+    Map.Load(mainData.map)                
         
 def InitForbiddenPlaces():
     Log.Save("InitForbiddenPlaces.\n")
@@ -204,6 +199,7 @@ def GetProduction(player):
             fort = Map.GetFort(wy, wx)
             if isinstance(fort, Buildings.Fortress) and fort.owner == player.username:
                 LocalMap.GetProduction(player, wy, wx)  
+    Database.SaveDatabase()
     Utility.SendMsg(player, Colors.COLOR_GREEN + "All production gathered!\n")   
         
 def AttackFortress(player, wy ,wx):
@@ -228,6 +224,7 @@ def RepairFortress(player, wy ,wx):
             if not LocalMap.RepairFortress(player):
                 Utility.SendMsg(player, Colors.COLOR_RED + "Nothing to repair!\n")
             else:
+                Database.SaveDatabase()
                 Log.Save(player.username + " repair fortress!\n")
         else:
             Utility.SendMsg(player, Colors.COLOR_RED + "Can't repair enemy fortress!\n")
@@ -250,6 +247,7 @@ def MoveArmy(player, wy, wx, geo):
             if dest_fort is not None:
                 if dest_fort.owner == player.username:
                     LocalMap.MoveUnits(player, wy, wx, geo)
+                    Database.SaveDatabase()
                 else:
                     Utility.SendMsg(player, Colors.COLOR_RED + "Can't move units into enemy fortress!\n")
             else:

@@ -2,7 +2,6 @@ from Resources import Resources
 from UserInfo import UserInfo
 from Colors import Colors
 from Data import mainData
-from Data import dbLock
 from Database import Database
 import Utility
 import State
@@ -15,28 +14,24 @@ class Player():
     
     def InitUserInfo(self):
         self.info = UserInfo()
-        with dbLock:
-            mainData.users_info.append((self.username, self.info))
-            Database.SaveDatabase()
+        mainData.users_info.append((self.username, self.info))
+        Database.SaveDatabase()
     
     def LoadUserInfo(self):
-        with dbLock:
-            for username_arg, info_arg in mainData.users_info:
-                if username_arg == self.username:
-                    self.info = info_arg
+        for username_arg, info_arg in mainData.users_info:
+            if username_arg == self.username:
+                self.info = info_arg
         
     def InitResources(self):
         self.resources = Resources()
         self.resources.Init(1000, 25, 25, 3)
-        with dbLock:
-            mainData.resources.append((self.username, self.resources))
-            Database.SaveDatabase()
+        mainData.resources.append((self.username, self.resources))
+        Database.SaveDatabase()
         
     def LoadResources(self):
-        with dbLock:
-            for username_arg, resources_arg in mainData.resources:
-                if username_arg == self.username:
-                    self.resources = resources_arg
+        for username_arg, resources_arg in mainData.resources:
+            if username_arg == self.username:
+                self.resources = resources_arg
     
     def ShowResources(self):        
         Utility.SendMsg(self, Colors.COLOR_GREEN + "Resources:\n")
@@ -59,6 +54,7 @@ class Player():
         for resType, resAmount in cost.iteritems():
             pAmount = int(resAmount * percent/100.0)
             self.resources[resType] -= pAmount
+        Database.SaveDatabase()
         return True
         
         

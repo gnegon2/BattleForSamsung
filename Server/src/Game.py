@@ -1,5 +1,6 @@
 from Commands import MenuCommands, MainCommands, LocalMapCommands, WorldMapCommands
 from Colors import Colors
+from Data import mainData
 from Database import Database
 from Map import mainMap as Map
 import Log
@@ -10,16 +11,15 @@ import Control
 import Utility 
 import Commands
 import Buildings
-import Config
 
 def InitGame():
     Log.Init()
-    if not Config.loadDatabase:
-        Database.InitDatabase()
+    if Database.InitDatabase():
         WorldMap.LoadMap()
         WorldMap.InitForbiddenPlaces()
+        mainData.map = Map
+        Database.SaveDatabase()
     else:
-        Database.LoadDatabase()
         WorldMap.LoadMapFromDb()
     Buildings.InitFortressLevels()
 

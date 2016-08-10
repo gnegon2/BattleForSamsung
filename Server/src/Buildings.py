@@ -6,8 +6,20 @@ from copy import copy
 import Utility
 import time
 import inspect
+import Log
 
 def InitFortressLevels():
+    Log.Save("InitFortressLevels.\n")
+    # Level 0 <- only for easier indexing
+    level_cost_0 = Resources()
+    level_cost_0.Init()
+    Fortress.cost_per_level.append(level_cost_0)
+    level_production_0 = Resources()
+    level_production_0.Init()
+    Fortress.production_per_level.append(level_production_0)
+    level_statistics_0 = Statistics()
+    level_statistics_0.Init()
+    Fortress.statistics_per_level.append(level_statistics_0)
     # Level 1
     level_cost_1 = Resources()
     level_cost_1.Init(500, 10, 10, 2)

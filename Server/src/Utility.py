@@ -1,6 +1,5 @@
 from Database import Database
 from Data import mainData
-from Data import dbLock
 import Log
 import Control
 import Crypt
@@ -16,27 +15,24 @@ def SendMsg(player, data, response = False):
 
 def CheckUserName(username):
     Log.Save("Checking username: " + username + "\n")
-    with dbLock:
-        for username_arg, password_arg in mainData.users:
-            password_arg
-            if username_arg == username:
-                return True
-        return False
+    for username_arg, password_arg in mainData.users:
+        password_arg
+        if username_arg == username:
+            return True
+    return False
 
 def CheckPassword(username, password):
     Log.Save("Checking password for username: " + username + "\n")
-    with dbLock:
-        for username_arg, password_arg in mainData.users:
-            if username_arg == username:
-                decrypted_password = Crypt.Decrypt(password_arg, password)
-                if decrypted_password == password:
-                    return True
-                else:
-                    return False
+    for username_arg, password_arg in mainData.users:
+        if username_arg == username:
+            decrypted_password = Crypt.Decrypt(password_arg, password)
+            if decrypted_password == password:
+                return True
+            else:
+                return False
 
 def CreateAccount(username, password):
     Log.Save("Creating account for username: " + username)
     account = (username, Crypt.Encrypt(password, password))
-    with dbLock:
-        mainData.users.append(account)
-        Database.SaveDatabase()   
+    mainData.users.append(account)
+    Database.SaveDatabase()   

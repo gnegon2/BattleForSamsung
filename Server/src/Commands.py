@@ -80,6 +80,7 @@ class BuildingCommands:
     _6_0_TOWER = "Tower"
     _7_0_LIBRARY = "Library"
     _8_0_UPGRADE_FORTRESS = "UpgradeFortress"
+    _9_0_UPGRADE_FORTRESS_INFO = "UpgradeFortressInfo"
     
     @staticmethod
     def Color():

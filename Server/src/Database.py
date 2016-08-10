@@ -4,18 +4,20 @@ import Data
 import pickle
 import Config
 import Log
+import os
 
 class Database():
     
     @staticmethod
     def InitDatabase():
-        Log.Save("Init database.\n")
-        Data.mainData.Init()
-        
-    @staticmethod
-    def LoadDatabase(): 
-        Log.Save("Load database.\n") 
-        Data.mainData.Load(Database.Load()) 
+        try:
+            Data.mainData.Load(Database.Load())
+            Log.Save("Load database.\n")
+            return False
+        except IOError:
+            Log.Save("Init database.\n")
+            Data.mainData.Init()  
+            return True 
     
     @staticmethod
     def SaveDatabase():
@@ -25,6 +27,7 @@ class Database():
                 
     @staticmethod           
     def Save(obj):
+        os.system("cp " + Config.databasePath + " ." + Config.databasePath + "_old")
         outputFile = open(Config.databasePath, 'wb')
         pickle.dump(obj, outputFile, -1)
         outputFile.close()

@@ -18,6 +18,7 @@ import re
 import Statistics
 import Geo
 from Buildings import Fortress
+from Database import Database
  
 def ParseCommandXY(player, command):
     try:
@@ -122,9 +123,11 @@ def BuildingMenu(player):
             # MainCommands <<<
             elif command == BuildingCommands._8_0_UPGRADE_FORTRESS:
                 UpgradeFortress(player)
+            elif command == BuildingCommands._9_0_UPGRADE_FORTRESS_INFO:
+                UpgradeFortressInfo(player)
             else:
                 building = Buildings.CommandToBuilding(command)
-                if isinstance(building, Buildings.Empty):
+                if building is Buildings.Empty:
                     Utility.SendMsg(player, Colors.COLOR_RED + "Undefined building!\n")
                 else:
                     BuildingActionMenu(player, building)
@@ -180,7 +183,7 @@ def CreateBuilding(player, building, y, x):
             field = Map.Get(pos)
             if isinstance(field, Buildings.Empty):
                 if player.Pay(building.cost, 100): 
-                    Map.Set(player, building, pos)
+                    Map.Set(player, building, pos, True)
                     player.info.buildingsBuildToday += 1
                     Utility.SendMsg(player, Colors.COLOR_GREEN + "Building created!\n")
                     Log.Save(player.username + " created building: " + building.__name__ +"\n") 
@@ -206,8 +209,7 @@ def GetProduction(player, wy, wx):
     for iType, iAmount in resource.iteritems():
         if iAmount > 0:
             player.resources[iType] += iAmount
-            Utility.SendMsg(player,  iType.color + iType.name + " = " + str(iAmount) + "\n")
-            
+            Utility.SendMsg(player,  iType.color + iType.name + " = " + str(iAmount) + "\n")    
                                  
 def UnitsMenu(player):
     level = Map.GetFort(player.wy, player.wx).level
@@ -242,7 +244,7 @@ def UnitsMenu(player):
             elif command.find(UnitsCommands._0_4_MOVE_UNIT) != -1:
                 succes, y1, x1, y2, x2, = ParseCommandFour(player, command)
                 if succes:
-                    MoveUnit(player, player.wy, player.wx, y1, x1, y2, x2)
+                    MoveUnit(player, player.wy, player.wx, y1, x1, y2, x2, True)
             else:
                 unit = Units.CommandToUnit(command)
                 if unit is Units.Empty:
@@ -302,7 +304,7 @@ def RecruitUnit(player, unit, y, x):
             if isinstance(field, Buildings.Empty):
                 if player.Pay(unit.cost, 100):
                     player.info.unitsRecruitedToday += 1
-                    Map.Set(player, unit, pos)
+                    Map.Set(player, unit, pos, True)
                     Utility.SendMsg(player, Colors.COLOR_GREEN + "Unit recruited!\n") 
                     Log.Save(player.username + " recruit unit:" + unit.__name__ +"\n") 
                 else:
@@ -317,11 +319,11 @@ def RecruitUnit(player, unit, y, x):
 def Destroy(player, y, x):
     pos = Pos(player.wy, player.wx, y, x)
     field = Map.Get(pos)
-    Log.Save(player.username + " destory " + field.__class__.__name__ + " on " + str(y) + " " + str(x))
+    Log.Save(player.username + " destroy " + field.__class__.__name__ + " on " + str(y) + " " + str(x))
     if not isinstance(field, Buildings.Fortress):
         if isinstance(field, Buildings.Building) or isinstance(field, Units.Unit):
             ReturnResources(player, field.cost, 50)
-            Map.SetEmpty(pos)
+            Map.SetEmpty(pos, True)
             Utility.SendMsg(player, Colors.COLOR_GREEN + "Succesfully destroyed!\n")
         else:
             Utility.SendMsg(player, Colors.COLOR_RED + "This field can't be destroyed!\n")
@@ -331,12 +333,13 @@ def Destroy(player, y, x):
 def Repair(player, y, x):
     pos = Pos(player.wy, player.wx, y, x)
     entity = Map.Get(pos)
-    if isinstance(entity, Units.Unit) or isinstance(entity, Buildings.Building):  
+    if isinstance(entity, Units.Unit) or isinstance(entity, Buildings.Building): 
         hp_max = entity.__class__.statistics[Statistics.HitPoints]
         hp_res = entity.statistics[Statistics.HitPoints]
-        percent = int((hp_max - hp_res / float(hp_max)) * 100)  
+        percent = int(((hp_max - hp_res) / float(hp_max)) * 100) 
         if not percent == 0:
             if player.Pay(entity.cost, percent):
+                entity.statistics[Statistics.HitPoints] = hp_max
                 Utility.SendMsg(player, Colors.COLOR_GREEN + entity.__class__.__name__ + " succesfully repaired!\n")
                 return True
             else:
@@ -386,14 +389,14 @@ def ParseCommandFour(player, command):
         Utility.SendMsg(player, Colors.COLOR_RED + "Bad number of arguments! Provide exactly four arguments!\n")
         return False, 0, 0, 0, 0
 
-def MoveUnit(player, wy, wx, y1, x1, y2, x2):        
+def MoveUnit(player, wy, wx, y1, x1, y2, x2, save):        
     pos2 = Pos(wy, wx, y2, x2)
     field2 = Map.Get(pos2)
     pos1 = Pos(wy, wx, y1, x1)
     field1 = Map.Get(pos1)
     if isinstance(field2, Buildings.Empty):
         if isinstance(field1, Units.Unit):
-            Map.Swap(pos1, pos2)
+            Map.Swap(pos1, pos2, save)
             Utility.SendMsg(player, Colors.COLOR_GREEN + field1.__class__.__name__ +" succesfully moved!\n")
         else:
             Utility.SendMsg(player, Colors.COLOR_RED + "Only units can be moved!\n") 
@@ -434,7 +437,8 @@ def MoveUnits(player, wy, wx, geo):
             pos1 = Pos(wy, wx, y, x)
             field1 = Map.Get(pos1)
             if isinstance(field1, Units.Unit):
-                MoveUnit(player, wy, wx, y, x, y + moveY, x + moveX)
+                MoveUnit(player, wy, wx, y, x, y + moveY, x + moveX, False)
+    Database.SaveDatabase()
 
 def OvertakeFortress(player, wy, wx):
     entity_list = []
@@ -444,26 +448,48 @@ def OvertakeFortress(player, wy, wx):
             entity = Map.Get(pos)
             if entity.owner != player.username:
                 if isinstance(entity, Units.Unit):
-                    Map.SetEmpty(pos)
+                    Map.SetEmpty(pos, True)
                 elif isinstance(entity, Buildings.Building):
                     entity_list.append((entity, y, x))  
-                    Map.SetEmpty(pos)                     
-    Map.SetFort(player, wy, wx)
+                    Map.SetEmpty(pos, True)                     
     for entity, y, x in entity_list:
         pos = Pos(wy, wx, y, x)
         Map.Set(player, entity.__class__, pos)
+    Map.SetFort(player, wy, wx)
 
 def UpgradeFortress(player):
     fort = Map.GetFort(player.wy, player.wx)
-    level = fort.level
-    if level <= len(Fortress.production_per_level):
-        cost = Buildings.Fortress.cost_per_level[level]
+    next_level = fort.level + 1
+    if next_level < len(Fortress.cost_per_level):
+        cost = Buildings.Fortress.cost_per_level[next_level]
         if player.Pay(cost, 100.0):
-            Map.ChangeFortLevel(player.wy, player.wx, level)
+            Map.ChangeFortLevel(player.wy, player.wx, next_level)
             Utility.SendMsg(player, Colors.COLOR_GREEN + "Successfully upgraded fortress!\n")
     else:
         Utility.SendMsg(player, Colors.COLOR_GREEN + "Fortress maximally upgraded!\n")
-        
+
+def UpgradeFortressInfo(player):
+    fort = Map.GetFort(player.wy, player.wx)
+    next_level = fort.level + 1
+    cost = Buildings.Fortress.cost_per_level[next_level]
+    Utility.SendMsg(player, Colors.COLOR_GREEN + "Fortress level: " + str(next_level) + "\n")
+    Utility.SendMsg(player, Colors.COLOR_ORANGE + "Cost: \n")
+    for iType, iAmount in cost.iteritems():
+        if iAmount > 0:
+            Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")
+    
+    production = Buildings.Fortress.production_per_level[next_level]
+    Utility.SendMsg(player, Colors.COLOR_ORANGE + "Production: \n")
+    for iType, iAmount in production.iteritems():
+        if iAmount > 0:
+            Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n")
+    
+    statistics = Buildings.Fortress.statistics_per_level[next_level]
+    Utility.SendMsg(player, Colors.COLOR_ORANGE + "Statistics: \n")
+    for iType, iAmount in statistics.iteritems():
+        if iAmount > 0:
+            Utility.SendMsg(player, iType.color + iType.name + ": " + str(iAmount) + "\n") 
+ 
 def ShowDetailInfo(player, y, x):
     pos = Pos(player.wy, player.wx, y, x)
     field = Map.Get(pos)
