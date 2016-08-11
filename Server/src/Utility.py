@@ -1,4 +1,3 @@
-from Database import Database
 from Data import mainData
 import Log
 import Control
@@ -34,5 +33,4 @@ def CheckPassword(username, password):
 def CreateAccount(username, password):
     Log.Save("Creating account for username: " + username)
     account = (username, Crypt.Encrypt(password, password))
-    mainData.users.append(account)
-    Database.SaveDatabase()   
+    mainData.users.append(account)  

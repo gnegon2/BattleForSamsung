@@ -129,7 +129,7 @@ class Battle():
     def MoveUnit(self, wy, wx,y, x):
         src_pos = Pos(wy, wx, y, x)
         unit = Map.Get(src_pos)
-        if isinstance(unit, Units.Unit) and unit.owner == self.attacker.username and unit.move > 0:
+        if isinstance(unit, Units.Unit) and unit.owner == self.attacker.username and unit.move > 0 and not unit.moved:
             if unit.army == Geo.NORTH:
                 ny, nx = y+1, x
             elif unit.army == Geo.SOUTH:
@@ -143,19 +143,34 @@ class Battle():
             if isinstance(field, Buildings.Empty):
                 Map.Swap(src_pos, dst_pos)
                 unit.move -= 1
+                unit.moved = True
                 return True
         return False
+    
+    def MoveUnits(self, wy, wx, startX, stopX, startY, stopY):
+        moved = False 
+        for x in range(startX, stopX):
+            for y in range(startY, stopY):
+                src_pos = Pos(wy, wx, y, x)
+                unit = Map.Get(src_pos)
+                if isinstance(unit, Units.Unit) and unit.owner == self.attacker.username and unit.move > 0:
+                    unit.moved = False
+        for x in range(startX, stopX):
+            for y in range(startY, stopY):
+                if self.MoveUnit(wy, wx, y, x):
+                    moved = True
+        return moved
     
     def ChangeGeo(self, wy, wx, y, x):
         src_pos = Pos(wy, wx, y, x)
         unit = Map.Get(src_pos)
         if isinstance(unit, Units.Unit) and unit.owner == self.attacker.username:
-            if x == Map.half or x == Map.half - 1:
+            if (x == Map.half) or (x == Map.half - 1):
                 if y < Map.half:
                     unit.army = Geo.NORTH
                 else:
                     unit.army = Geo.SOUTH
-            if y == Map.half or y == Map.half - 1:
+            if (y == Map.half) or (y == Map.half - 1):
                 if x > Map.half:
                     unit.army = Geo.EAST
                 else:
@@ -163,30 +178,22 @@ class Battle():
         
     def AttackerMove(self):
         moved = False  
-        if self.army[Geo.NORTH]: 
-            for x in range(Map.firstQ, Map.thirdQ):
-                for y in range(Map.thirdQ, Map.end):
-                    if self.MoveUnit(self.nwy, self.nwx, y, x):
-                        moved = True
+        if self.army[Geo.NORTH]:
+            if self.MoveUnits(self.nwy, self.nwx, Map.firstQ, Map.thirdQ, Map.thirdQ, Map.end):
+                moved = True
         if self.army[Geo.SOUTH]:
-            for x in range(Map.firstQ, Map.thirdQ):
-                for y in range(Map.firstQ):
-                    if self.MoveUnit(self.swy, self.swx, y, x):
-                        moved = True
+            if self.MoveUnits(self.swy, self.swx, Map.firstQ, Map.thirdQ, 0, Map.firstQ):
+                moved = True
         if self.army[Geo.EAST]:
-            for x in range(Map.firstQ):
-                for y in range(Map.firstQ, Map.thirdQ):
-                    if self.MoveUnit(self.ewy, self.ewx, y, x):
-                        moved = True
+            if self.MoveUnits(self.ewy, self.ewx, 0, Map.firstQ, Map.firstQ, Map.thirdQ):
+                moved = True
         if self.army[Geo.WEST]:
-            for x in range(Map.thirdQ, Map.end):
-                for y in range(Map.firstQ, Map.thirdQ):
-                    if self.MoveUnit(self.wwy, self.wwx, y, x):
-                        moved = True
+            if self.MoveUnits(self.wwy, self.wwx, Map.thirdQ, Map.end, Map.firstQ, Map.thirdQ):
+                moved = True
+        if self.MoveUnits(self.cwy, self.cwx, 0, Map.end, 0, Map.end):
+                moved = True                 
         for x in range(Map.end):
             for y in range(Map.end):
-                if self.MoveUnit(self.cwy, self.cwx, y, x):
-                    moved = True
                 self.ChangeGeo(self.cwy, self.cwx, y, x)
         return moved
     
@@ -247,19 +254,13 @@ class Battle():
         return 0
                       
     def TakeDamage(self, player, attacker_unit, enemy_unit):
-        print "attacker_unit =", attacker_unit
-        print "enemy_unit =", enemy_unit
         damage_range = attacker_unit.statistics[Statistics.MaxDamage] - attacker_unit.statistics[Statistics.MinDamage]
         power = attacker_unit.statistics[Statistics.Attack] * (attacker_unit.statistics[Statistics.MinDamage] + random.randint(0, damage_range))
         power = int(power  + power * self.Weaknesses(attacker_unit, enemy_unit))
-        print "enemy_unit.hp =",enemy_unit.statistics[Statistics.HitPoints]
-        print "power =",power
         damage = int(round(float(power / enemy_unit.statistics[Statistics.Defence])))
         if damage < 1:
             damage = 1
-        print "damage =",damage
         enemy_unit.statistics[Statistics.HitPoints] -= damage
-        print "enemy_unit.hp =",enemy_unit.statistics[Statistics.HitPoints]
         if self.log:
             if attacker_unit.owner == self.attacker.username:
                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Your " + attacker_unit.__class__.__name__ + " attack " + enemy_unit.__class__.__name__ + " taking " + str(damage) + " damage!\n")

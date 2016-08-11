@@ -60,7 +60,7 @@ class BattleMap():
                 mapMsg += instance.color + instance.field
             if self.army[Geo.EAST]:
                 for x in range(Map.firstQ):   
-                    instance = Map.Get(Pos(self.wwy, self.wwx, y, x))
+                    instance = Map.Get(Pos(self.ewy, self.ewx, y, x))
                     mapMsg += instance.color + instance.field
             mapMsg += "\n"
         # SOUTH

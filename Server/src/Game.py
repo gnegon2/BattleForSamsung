@@ -68,6 +68,8 @@ def Register(player):
     player.state = State.WORLD_MAP
     player.InitResources()
     player.InitUserInfo()
+    Database.SaveDatabase()
+    
     Log.Save("New account created: " + player.username + "\n");
 
 def Login(player):     

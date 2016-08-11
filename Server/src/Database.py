@@ -5,6 +5,7 @@ import pickle
 import Config
 import Log
 import os
+import thread
 
 class Database():
     
@@ -21,16 +22,16 @@ class Database():
     
     @staticmethod
     def SaveDatabase():
-        with dbLock:
-            Database.Save(Data.mainData)
-            Log.Save("Database saved.\n")
+        thread.start_new_thread( Database.Save, (Data.mainData, ) )
                 
     @staticmethod           
     def Save(obj):
-        os.system("cp " + Config.databasePath + " ." + Config.databasePath + "_old")
-        outputFile = open(Config.databasePath, 'wb')
-        pickle.dump(obj, outputFile, -1)
-        outputFile.close()
+        with dbLock:
+            os.system("cp " + Config.databasePath + " ." + Config.databasePath + "_old")
+            outputFile = open(Config.databasePath, 'wb')
+            pickle.dump(obj, outputFile, -1)
+            outputFile.close()
+            Log.Save("Database saved.\n")
         
     @staticmethod
     def Load(): 

@@ -8,6 +8,7 @@ import Utility
 import Commands
 import State
 import Control
+from Database import Database
 
 class Cost():
     entire_cost = Resources()
@@ -213,9 +214,11 @@ def ScoutingMode(player):
         elif command == MainCommands._2_0_RETURN:
             Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to World Map!\n")
             player.state = State.WORLD_MAP
+            Database.SaveDatabase()
         elif command == MainCommands._3_0_EXIT:
             Utility.SendMsg(player, Control.CTRL_EXIT)
             player.state = State.EXITING
+            Database.SaveDatabase()
         # MainCommands <<<
         elif command == ScoutingCommands._0_0_SHOW_INFO:
             fort = Map.GetFort(player.wy, player.wx)  
