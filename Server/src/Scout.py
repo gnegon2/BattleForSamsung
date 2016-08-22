@@ -211,11 +211,11 @@ def ScoutingMode(player):
             ShowFogMap(player)
         elif command == MainCommands._1_0_SHOW_RESOURCES:
             player.ShowResources()
-        elif command == MainCommands._2_0_RETURN:
+        elif command == MainCommands._3_0_RETURN:
             Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to World Map!\n")
             player.state = State.WORLD_MAP
             Database.SaveDatabase()
-        elif command == MainCommands._3_0_EXIT:
+        elif command == MainCommands._4_0_EXIT:
             Utility.SendMsg(player, Control.CTRL_EXIT)
             player.state = State.EXITING
             Database.SaveDatabase()
@@ -238,4 +238,6 @@ def ScoutingMode(player):
                 ShowEast(player)       
         elif command == ScoutingCommands._5_0_SCOUT_WEST_MAP:
             if player.Pay(Cost.rest_cost, 100):
-                ShowWest(player)      
+                ShowWest(player)
+        else:
+            Utility.SendMsg(player, Colors.COLOR_RED + "Undefined command! Try again!\n")      

@@ -45,11 +45,13 @@ def ExecuteCommand(player, command):
         ShowMap(player)
     elif command == MainCommands._1_0_SHOW_RESOURCES:
         player.ShowResources()
-    elif command == MainCommands._2_0_RETURN:
+    elif command == MainCommands._2_0_GET_PRODUCTION:
+        GetGlobalProduction(player)
+    elif command == MainCommands._3_0_RETURN:
         Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to World Map!\n")
         player.state = State.WORLD_MAP
         Database.SaveDatabase()
-    elif command == MainCommands._3_0_EXIT:
+    elif command == MainCommands._4_0_EXIT:
         Utility.SendMsg(player, Control.CTRL_EXIT)
         player.state = State.EXITING
         Database.SaveDatabase()
@@ -117,11 +119,13 @@ def BuildingMenu(player):
                 ShowMap(player)
             elif command == MainCommands._1_0_SHOW_RESOURCES:
                 player.ShowResources()
-            elif command == MainCommands._2_0_RETURN:
+            elif command == MainCommands._2_0_GET_PRODUCTION:
+                GetGlobalProduction(player)
+            elif command == MainCommands._3_0_RETURN:
                 player.state = State.LOCAL_MAP
                 Database.SaveDatabase()
                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Local Map!\n")
-            elif command == MainCommands._3_0_EXIT:
+            elif command == MainCommands._4_0_EXIT:
                 Utility.SendMsg(player, Control.CTRL_EXIT)
                 player.state = State.EXITING
                 Database.SaveDatabase()
@@ -160,11 +164,13 @@ def BuildingActionMenu(player, building):
                 ShowMap(player)
             elif command == MainCommands._1_0_SHOW_RESOURCES:
                 player.ShowResources()
-            elif command == MainCommands._2_0_RETURN:
+            elif command == MainCommands._2_0_GET_PRODUCTION:
+                GetGlobalProduction(player)
+            elif command == MainCommands._3_0_RETURN:
                 player.state = State.BUILDING_MENU
                 Database.SaveDatabase()
                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Building Menu!\n")
-            elif command == MainCommands._3_0_EXIT:
+            elif command == MainCommands._4_0_EXIT:
                 Utility.SendMsg(player, Control.CTRL_EXIT)
                 player.state = State.EXITING
                 Database.SaveDatabase()
@@ -216,7 +222,16 @@ def GetProduction(player, wy, wx):
     for iType, iAmount in resource.iteritems():
         if iAmount > 0:
             player.resources[iType] += iAmount
-            Utility.SendMsg(player,  iType.color + iType.name + " = " + str(iAmount) + "\n")    
+            Utility.SendMsg(player,  iType.color + iType.name + " = " + str(iAmount) + "\n")
+            
+def GetGlobalProduction(player):
+    for wy in range(Map.y_size):
+        for wx in range(Map.x_size):
+            fort = Map.GetFort(wy, wx)
+            if isinstance(fort, Buildings.Fortress) and fort.owner == player.username:
+                GetProduction(player, wy, wx)  
+    Database.SaveDatabase()
+    Utility.SendMsg(player, Colors.COLOR_GREEN + "All production gathered!\n")      
                                  
 def UnitsMenu(player):
     level = Map.GetFort(player.wy, player.wx).level
@@ -240,12 +255,14 @@ def UnitsMenu(player):
                 ShowMap(player)
             elif command == MainCommands._1_0_SHOW_RESOURCES:
                 player.ShowResources()
-            elif command == MainCommands._2_0_RETURN:
+            elif command == MainCommands._2_0_GET_PRODUCTION:
+                GetGlobalProduction(player)
+            elif command == MainCommands._3_0_RETURN:
                 player.state = State.LOCAL_MAP
                 Database.SaveDatabase()
                 Utility.SendMsg(player, Control.CTRL_MENU_LOCAL_MAP)
                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Local Map!\n")
-            elif command == MainCommands._3_0_EXIT:
+            elif command == MainCommands._4_0_EXIT:
                 Utility.SendMsg(player, Control.CTRL_EXIT)
                 player.state = State.EXITING
                 Database.SaveDatabase()
@@ -284,11 +301,13 @@ def UnitsActionMenu(player, unit):
                 ShowMap(player)
             elif command == MainCommands._1_0_SHOW_RESOURCES:
                 player.ShowResources()
-            elif command == MainCommands._2_0_RETURN:
+            elif command == MainCommands._2_0_GET_PRODUCTION:
+                GetGlobalProduction(player)
+            elif command == MainCommands._3_0_RETURN:
                 player.state = State.UNITS_MENU
                 Database.SaveDatabase()
                 Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Units Menu!\n")
-            elif command == MainCommands._3_0_EXIT:
+            elif command == MainCommands._4_0_EXIT:
                 Utility.SendMsg(player, Control.CTRL_EXIT)
                 player.state = State.EXITING
                 Database.SaveDatabase()

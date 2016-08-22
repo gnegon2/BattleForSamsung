@@ -22,7 +22,7 @@ def LoadMap():
     inputFile = open(Config.mapPath, 'r')
     data = inputFile.readlines()
     Map.y_size = len(data)
-    Map.x_size = len(data[0].replace("\n", ""))
+    Map.x_size = len(data[0].replace("\n", "").replace(" ", ""))
     
     for y in range(Map.y_size * Map.end):
         row = []; y
@@ -100,33 +100,33 @@ def ExecuteCommand(player, command):
         ShowMap(player)
     elif command == MainCommands._1_0_SHOW_RESOURCES:
         player.ShowResources()
-    elif command == MainCommands._2_0_RETURN:
+    elif command == MainCommands._2_0_GET_PRODUCTION:
+        LocalMap.GetGlobalProduction(player)
+    elif command == MainCommands._3_0_RETURN:
         Utility.SendMsg(player, Colors.COLOR_GREEN + "Returning to Main Menu!\n")
         player.state = State.INIT
         player.loggedIn = False
-    elif command == MainCommands._3_0_EXIT:
+    elif command == MainCommands._4_0_EXIT:
         Utility.SendMsg(player, Control.CTRL_EXIT)
         player.state = State.EXITING
     # MainCommands <<<     
-    elif command == WorldMapCommands._3_0_GET_PRODUCTION:
-        GetProduction(player)
     elif command == WorldMapCommands._0_0_SHOW_FORTRESS_INFO:
         Buildings.ShowInfo(player, Buildings.Fortress)
     elif command.find(WorldMapCommands._1_2_SETTLE_FORTRESS) == 0 or \
          command.find(WorldMapCommands._2_2_ENTER_FORTRESS) == 0 or \
-         command.find(WorldMapCommands._4_2_ATTACK_FORTRESS) == 0 or \
-         command.find(WorldMapCommands._5_2_REPAIR_FORTRESS) == 0:
+         command.find(WorldMapCommands._3_2_ATTACK_FORTRESS) == 0 or \
+         command.find(WorldMapCommands._4_2_REPAIR_FORTRESS) == 0:
         succes, wy, wx = ParseCommand(player, command)
         if succes:
             if command.find(WorldMapCommands._1_2_SETTLE_FORTRESS) == 0:
                 SettleFortress(player, wy, wx)
             elif command.find(WorldMapCommands._2_2_ENTER_FORTRESS) == 0:
                 EnterFortress(player, wy, wx)
-            elif command.find(WorldMapCommands._4_2_ATTACK_FORTRESS) == 0:
+            elif command.find(WorldMapCommands._3_2_ATTACK_FORTRESS) == 0:
                 AttackFortress(player, wy, wx)
-            elif command.find(WorldMapCommands._5_2_REPAIR_FORTRESS) == 0:
+            elif command.find(WorldMapCommands._4_2_REPAIR_FORTRESS) == 0:
                 RepairFortress(player, wy, wx)
-    elif command.find(WorldMapCommands._6_3_MOVE_ARMY) == 0:
+    elif command.find(WorldMapCommands._5_3_MOVE_ARMY) == 0:
         succes, wy, wx, geo = ParseCommandThree(player, command)
         if succes:
             MoveArmy(player, wy, wx, geo)
@@ -191,16 +191,7 @@ def EnterFortress(player, wy, wx):
         else:
             Scout.ScoutingMode(player)
     else:
-        Utility.SendMsg(player, Colors.COLOR_RED + "Field is empty!\n")
-        
-def GetProduction(player):
-    for wy in range(Map.y_size):
-        for wx in range(Map.x_size):
-            fort = Map.GetFort(wy, wx)
-            if isinstance(fort, Buildings.Fortress) and fort.owner == player.username:
-                LocalMap.GetProduction(player, wy, wx)  
-    Database.SaveDatabase()
-    Utility.SendMsg(player, Colors.COLOR_GREEN + "All production gathered!\n")   
+        Utility.SendMsg(player, Colors.COLOR_RED + "Field is empty!\n") 
         
 def AttackFortress(player, wy ,wx):
     fort = Map.GetFort(wy, wx)

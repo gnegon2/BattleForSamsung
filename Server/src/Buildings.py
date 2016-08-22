@@ -193,9 +193,9 @@ class Fortress(Building):
     
     statistics_per_level = []
     statistics = Statistics()
-    statistics.Init(250, 10, 3, 3, 5, 6)
+    statistics.Init(200, 10, 3, 3, 5, 6)
     
-    army_production = 1
+    army_production = 2
     
     def __init__(self, player):
         self.level = 1
@@ -223,12 +223,12 @@ class House(Building):
     color = Colors.COLOR_GREEN
     
     cost = Resources()
-    cost.Init(60, 3, 3)
+    cost.Init(30, 1, 1)
     
     statistics = Statistics()
     statistics.Init(120, 4)
       
-    army_production = 5
+    army_production = 3
         
     def __init__(self, player):
         self.field = self.__class__.field
@@ -252,10 +252,10 @@ class Bank(Building):
     color = Colors.COLOR_GOLD
     
     cost = Resources()
-    cost.Init(50, 6, 6)
+    cost.Init(30, 3, 3)
     
     production = Resources()
-    production.Init(60)
+    production.Init(40)
     
     statistics = Statistics()
     statistics.Init(80, 4)
@@ -277,10 +277,10 @@ class SawMill(Building):
     color = Colors.COLOR_WOOD
     
     cost = Resources()
-    cost.Init(60, 0, 6)
+    cost.Init(50, 0, 5)
     
     production = Resources()
-    production.Init(0, 5)
+    production.Init(0, 4)
     
     statistics = Statistics()
     statistics.Init(80, 4)
@@ -302,10 +302,10 @@ class Mine(Building):
     color = Colors.COLOR_STEEL
     
     cost = Resources()
-    cost.Init(60, 6)
+    cost.Init(50, 5)
     
     production = Resources()
-    production.Init(0, 0, 5)
+    production.Init(0, 0, 4)
     
     statistics = Statistics()
     statistics.Init(100, 5)  
@@ -327,7 +327,7 @@ class CrystalMine(Building):
     color = Colors.COLOR_VIOLET
     
     cost = Resources()
-    cost.Init(200, 4, 4)
+    cost.Init(150, 3, 3)
     
     production = Resources()
     production.Init(0, 0, 0, 1)
@@ -352,7 +352,7 @@ class Wall(Building):
     color = Colors.COLOR_AZURE
     
     cost = Resources()
-    cost.Init(30, 1, 1)
+    cost.Init(10, 1, 1)
     
     statistics = Statistics()
     statistics.Init(100, 10) 
@@ -373,7 +373,7 @@ class Tower(Building):
     color = Colors.COLOR_BLOOD
     
     cost = Resources()
-    cost.Init(250, 5, 5, 1)
+    cost.Init(150, 3, 3, 1)
     
     statistics = Statistics()
     statistics.Init(150, 8, 6, 8, 10, 6) 
@@ -394,7 +394,7 @@ class Library(Building):
     color = Colors.COLOR_AZURE
     
     cost = Resources()
-    cost.Init(200, 4, 4, 1)
+    cost.Init(150, 3, 3, 1)
     
     production = Resources()
     production.Init(0, 0, 0, 0, 1)

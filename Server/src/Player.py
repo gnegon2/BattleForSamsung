@@ -22,7 +22,7 @@ class Player():
         
     def InitResources(self):
         self.resources = Resources()
-        self.resources.Init(1000, 25, 25, 3)
+        self.resources.Init(700, 12, 12, 2)
         mainData.resources.append((self.username, self.resources))
         
     def LoadResources(self):
@@ -30,7 +30,10 @@ class Player():
             if username_arg == self.username:
                 self.resources = resources_arg
     
-    def ShowResources(self):        
+    def ShowResources(self):
+        self.info.CheckLastBuild()
+        self.info.CheckLastRecruit()
+        
         Utility.SendMsg(self, Colors.COLOR_GREEN + "Resources:\n")
         for resType, resAmount in self.resources.iteritems():
             Utility.SendMsg(self, resType.color + resType.name + " = " + str(resAmount) + "\n")

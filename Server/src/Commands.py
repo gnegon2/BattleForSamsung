@@ -39,8 +39,9 @@ class MenuCommands():
 class MainCommands:
     _0_0_SHOW_MAP = "ShowMap"
     _1_0_SHOW_RESOURCES = "ShowResources"
-    _2_0_RETURN = "Return"
-    _3_0_EXIT = "Exit"
+    _2_0_GET_PRODUCTION = "GetProduction"
+    _3_0_RETURN = "Return"
+    _4_0_EXIT = "Exit"
     
     @staticmethod
     def Color():
@@ -50,10 +51,9 @@ class WorldMapCommands:
     _0_0_SHOW_FORTRESS_INFO = "ShowFortressInfo"
     _1_2_SETTLE_FORTRESS = "SettleFortress"
     _2_2_ENTER_FORTRESS = "EnterFortress"
-    _3_0_GET_PRODUCTION = "GetProduction"
-    _4_2_ATTACK_FORTRESS = "AttackFortress"
-    _5_2_REPAIR_FORTRESS = "RepairFortress"
-    _6_3_MOVE_ARMY = "MoveArmy"
+    _3_2_ATTACK_FORTRESS = "AttackFortress"
+    _4_2_REPAIR_FORTRESS = "RepairFortress"
+    _5_3_MOVE_ARMY = "MoveArmy"
     
     @staticmethod
     def Color():

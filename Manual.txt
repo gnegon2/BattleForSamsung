@@ -1,0 +1,135 @@
+﻿
+                                       /\
+                                      /`:\
+                                     /`'`:\
+                                    /`'`'`:\
+                                   /`'`'`'`:\
+                                  /`'`'`'`'`:\
+                                   |`'`'`'`:|
+     _ _  _  _  _                  |] ,-.  :|_  _  _  _
+    ||| || || || |                 |  |_| ||| || || || |
+    |`' `' `' `'.|                 | _'=' |`' `' `' `'.|
+    :          .:;                 |'-'   :          .:;
+     \-..____..:/  _  _  _  _  _  _| _  _'-\-..____..:/
+      :--------:_,' || || || || || || || `.::--------:
+      |]     .:|:.  `' `'_`' `' `' `' `'    | '-'  .:|
+      |  ,-. .[|:._     '-' ____     ___    |   ,-.'-|
+      |  | | .:|'--'_     ,'____`.  '---'   |   | |.:|
+      |  |_| .:|:.'--' ()/,| |`|`.\()   __  |   |_|.:|
+      |  '=' .:|:.     |::_|_|_|\|::   '--' |  _'='.:|
+      | __   .:|:.     ;||-,-,-,-,|;        | '--' .:|
+      |'--'  .:|:. _  ; ||       |:|        |      .:|
+      |      .:|:.'-':  ||       |;|     _  |]     _:|
+      |      '-|:.   ;  ||       :||    '-' |     '--|
+      |  _   .:|].  ;   ||       ;||]       |   _  .:|
+      | '-'  .:|:. :   [||      ;|||        |  '-' .:|
+  ,', ;._____.::-- ;---->'-,--,:-'<'--------;._____.::.`.
+ ((  (          )_;___,' ,' ,  ; //________(          ) ))
+  `. _`--------' : -,' ' , ' '; //-       _ `--------' ,'
+       __  .--'  ;,' ,'  ,  ': //    -.._    __  _.-  -
+   `-   --    _ ;',' ,'  ,' ,;/_  -.       ---    _,
+       _,.   /-:,_,_,_,_,_,_(/:-\   ,     ,.    _
+     -'   `-'--'-'-'-'-'-'-'-''--'-' `-'`'  `'`' `-SSt-
+
+
+______       _   _   _       ______           _____                                       
+| ___ \     | | | | | |      |  ___|         /  ___|                                      
+| |_/ / __ _| |_| |_| | ___  | |_ ___  _ __  \ `--.  __ _ _ __ ___  ___ _   _ _ __   __ _ 
+| ___ \/ _` | __| __| |/ _ \ |  _/ _ \| '__|  `--. \/ _` | '_ ` _ \/ __| | | | '_ \ / _` |
+| |_/ / (_| | |_| |_| |  __/ | || (_) | |    /\__/ / (_| | | | | | \__ \ |_| | | | | (_| |
+\____/ \__,_|\__|\__|_|\___| \_| \___/|_|    \____/ \__,_|_| |_| |_|___/\__,_|_| |_|\__, |
+                                                                                     __/ |
+                                                                                    |___/ 
+
+---------------------------------------USER MANUAL----------------------------------------
+
+
+1. Konfiguracja gry
+
+echo 'export PYTHONPATH=$PYTHONPATH:/home/m.grzegorzek/BattleForSamsung/pycrypto/lib/python2.7/site-packages/:/home/m.grzegorzek/BattleForSamsung/prompt/lib/python2.7/site-packages/' >> ~/.bashrc
+
+source ~/.bashrc
+
+2. Uruchomienie gry
+
+cd /home/m.grzegorzek/BattleForSamsung/src
+
+python Client.py
+
+3. Rozpoczęcie gry
+
+Register
+
+4. Logowanie do gry
+
+Login
+
+5. Wyjście z gry
+
+Exit
+
+6. Komendy główne
+
+ShowMap -> pokazanie mapy świata/lokalnej
+ShowResources -> pokazanie zasobów gracza
+Return -> powrót do poprzedniego menu
+Exit -> wyjście z gry
+
+7. Komendy na mapie świata
+
+ShowFortressInfo -> pokazanie informacji na temat fortecy
+SettleFortress Y X -> założenie fortecy na polu Y X ( Y to oś pionowa, X pozioma )
+EnterFortress Y X -> wejście do fortecy na polu Y X ( jeśli forteca należy do przeciwnika, wejście w tryb Szpiegowania )
+GetProduction -> zebranie produkcji ze wszystkich fortec
+AttackFortress Y X -> zaatakowanie fortecy na polu Y X
+( 
+	aby zaatakować fortecę na polu Y X, gracz atakujący musi posiadać conajmniej jedną fortecę w sąsiedztwie pola Y X
+	oraz musi posiadać w tej fortecy w obszarze bitewnym skierowanym w kierunku atakującej fortecy conajmniej jedną jednostkę, przykładowo:
+	atakowana forteca jest na polu (2,2), gracz atakujący ma fortecę na polu (2,3)
+	jednostka wojskowa atakującego gracza musi znajdować się na polu (0,9) mapy lokalnej pola (2,3), aby gracz mógł zaatakować (umieszczona na zachodnim polu bitewnym)
+)
+RepairFortress Y X -> reperuje wszystkie budynki/jednostki znajdujące sie w danej fortecy
+MoveArmy Y X N -> przesuwa armię z pola Y X w kierunku N
+(
+	przykładowo:
+	gracz posiada fortecę na polach (2,2) oraz (3,2), jeśli chce przenieść armię z pola (2,2) na pole (3,2), najpierw musi umieścić jednostki
+	z pola (2,2) na południowym obszarze bitewnym tego pola (na przykład (7,18)) (ponieważ pole (3,2) jest na południe względem pola (2,2))
+	oraz wydać komendę:
+	MoveArmy 2 2 S ( S oznacza South )
+)
+
+7. Komendy na mapie lokalnej
+
+Buildings -> wejście w tryb budowania
+Army -> wejście w tryb rekrutowania jednostek
+Destroy Y X -> zniszczenie budynku/jednostki na danym polu ( zwracane jest 50% wartości budynku/jednostki )
+Repair Y X -> naprawa budynku/jednostki ( wprost proporcjonalne do straconych punktów życia )
+ShowDetailInfo Y X -> szczegółowe info na temat budynku/jednostki znajdującej się na danym polu
+
+8. Komendy w trybie budowania
+
+House - Library -> budynki
+UpgradeFortress -> ulepszenie fortecy (dostęp do nowych jednostek + zwiększenie statystyk i produkcji)
+UpgradeFortressInfo -> info na temat następnego poziomu fortecy
+
+9. Komendy w trybie armii
+
+MoveUnit Y1 X1 Y2 X2 -> przesunięcie jednostki z pola (Y1,X1) na pole (Y2,X2)
+Peasant - Cannon -> jednostki bojowe
+
+
+10. Komendy w trybie akcji (po wybraniu budynku/jednostki)
+
+ShowInfo -> pokazanie info na temat budynku/jednostki
+Create Y X -> utworzenie budynku/jednostki na danym polu
+
+11. Komendy w trakcie bitwy 
+
+QuickBattle -> rozegranie szybkiej bitwy
+MakeMove -> wykonanie i wyświetlenie pojedynczego ruchu jednostek
+
+12. Komendy w trybie zwiadowcy
+
+ShowInfo -> pokazanie informacji na temat kosztów zwiadu
+ScoutEntireMap -> pokazanie całej mapy przeciwnika
+ScoutNorthMap - ScoutWestMap -> pokazanie części mapy przeciwnika
